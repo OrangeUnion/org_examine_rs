@@ -1,0 +1,3 @@
+database_url: mariadb://localhost:3306/org_system
+database_username: root
+database_password: 369
