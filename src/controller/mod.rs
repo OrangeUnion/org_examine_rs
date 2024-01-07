@@ -9,7 +9,8 @@ mod test_controller;
 mod html_controller;
 
 pub async fn run() {
-    let address = "0.0.0.0:8000";
+    let port = app::get_config().await.server_port;
+    let address = format!("0.0.0.0:{port}");
     log_info!("启动参数: {address}");
 
     let session_config = SessionConfig::default().with_table_name("session_table");

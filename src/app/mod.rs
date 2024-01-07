@@ -10,7 +10,8 @@ pub mod sys_role;
 pub mod org_examination;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-struct Config {
+pub struct Config {
+    pub server_port: i32,
     database_url: String,
     database_username: String,
     database_password: String,
@@ -22,7 +23,7 @@ pub async fn get_pool() -> Result<Pool<MySql>, Error> {
     sqlx::MySqlPool::connect_with(url_option).await
 }
 
-async fn get_config() -> Config {
+pub async fn get_config() -> Config {
     let mut yaml_file = tokio::fs::File::open("config.yaml").await.expect("read file error");
     let mut yaml_str = String::new();
     yaml_file.read_to_string(&mut yaml_str).await.expect("read str error");
