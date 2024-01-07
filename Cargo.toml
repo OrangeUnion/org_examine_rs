@@ -1,0 +1,38 @@
+[package]
+name = "org_system_server"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde_json = "*"
+serde_yaml = "*"
+chrono = { version = "*", features = ["serde"] }
+ring = { version = "0.17.7", features = ["default"] }
+bcrypt = "*"
+tower = { version = "*" }
+tower-http = { version = "*", features = ["cors", "trace"] }
+askama = { version = "*", features = ["with-axum", "serde-json", "serde"] }
+askama_axum = "*"
+axum_session = { version = "*", features = ["key-store"] }
+
+[dependencies.axum]
+version = "*"
+features = ["json", "multipart", "tokio", "ws", "form"]
+
+[dependencies.serde]
+version = "*"
+features = ["derive"]
+
+[dependencies.sqlx]
+version = "*"
+features = ["default", "mysql", "runtime-tokio", "chrono", "json"]
+
+[dependencies.tokio]
+version = "*"
+features = ["full"]
+
+[dependencies.reqwest]
+version = "*"
+features = ["serde_json", "cookies", "json"]

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 在页面加载前触发的逻辑
+            if (sessionStorage.getItem('token') !== null) {
+                return window.location.href = '/';
+            }
+        });
+    </script>
+    <meta charset="UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>ORG 管理系统 - {{title}}</title>
+</head>
+<body class="bg-slate-50">
+<div class="box-border rounded-3xl container mx-auto bg-purple-50 hover:shadow-xl shadow-lg shadow-purple-50s duration-300 2xl:w-4/12 xl:w-4/12 lg:w-5/12 md:w-8/12 sm:w-11/12 w-11/12 m-40 p-6">
+    <div class="antialiased tracking-widest font-thin text-purple-800 text-4xl font-bold p-8 text-center">
+        Org 管理系统
+    </div>
+    <form class="flex justify-center flex-col content-center" id="loginForm">
+        <div class="flex justify-center items-center mb-6">
+            <label for="username" class="font-medium px-3 text-lg text-purple-800 inline-block w-auto">账 户</label>
+            <input id="username"
+                   class="text-purple-900 outline-none rounded-full bg-white border-solid border-inherit hover:border-none active:border-solid shadow hover:shadow-md duration-300 w-9/12 h-10 px-3"
+                   name="username">
+        </div>
+        <div class="flex justify-center items-center mb-6">
+            <label for="password" class="font-medium px-3 text-lg text-purple-800 inline-block w-auto">密 码</label>
+            <input id="password"
+                   class="text-purple-900 outline-none rounded-full bg-white border-solid border-inherit hover:border-none active:border-solid shadow hover:shadow-md duration-300 w-9/12 h-10 px-3"
+                   name="username" type="password">
+        </div>
+        <div class="container mx-auto p-6 text-center">
+            <button type="submit"
+                    class="antialiased tracking-widest font-semibold bg-purple-500 text-lg hover:bg-purple-400 active:bg-purple-600 bg-fixed rounded-full text-slate-50 px-5 py-1 drop-shadow-md duration-300 w-4/12">
+                登 录
+            </button>
+            <a href="/"
+                    class="inline-block antialiased tracking-widest font-semibold bg-purple-500 text-lg hover:bg-purple-400 active:bg-purple-600 bg-fixed rounded-full text-slate-50 px-5 py-1 drop-shadow-md duration-300 w-4/12">
+                首 页
+            </a>
+        </div>
+    </form>
+</div>
+<script>
+    document.getElementById('loginForm').addEventListener('submit', function (event) {
+        event.preventDefault(); // 阻止默认表单提交行为
+
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+
+        if (usernameInput instanceof HTMLInputElement && passwordInput instanceof HTMLInputElement) {
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+
+            const xhr = new XMLHttpRequest();
+
+            xhr.open('POST', '/login_check', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+
+            const data = JSON.stringify({username, password});
+            xhr.send(data);
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    const responseData = JSON.parse(xhr.responseText);
+                    if (xhr.status === 200 && responseData.is_login) {
+                        console.log('Link successful!');
+                        sessionStorage.setItem('token', responseData.token)
+                        window.location.href = '/'; // 登录成功，跳转到指定页面
+                    } else {
+                        console.error('Login failed:', xhr.responseText);
+                        window.location.href = '/login'; // 登录失败，跳转到登录页面
+                    }
+                }
+            };
+
+            // 登录成功后重定向到指定页面
+        }
+    });
+</script>
+</body>
+</html>
