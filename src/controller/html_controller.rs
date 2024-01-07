@@ -37,12 +37,14 @@ pub async fn examination_update() -> impl IntoResponse {
 
 pub async fn examination_check(Form(res): Form<Value>) -> impl IntoResponse {
     log_link!("{res}");
-    let ticket = res["ticket"].as_str().unwrap_or("0").parse::<usize>().unwrap_or(0);
+    let ticket_size = res["ticket_size"].as_str().unwrap_or("0").parse::<usize>().unwrap_or(0);
     let mut vec_answer = vec![];
-    for re in 1..ticket {
-        log_info!("{}",res[format!("examination{}",re)]);
-        vec_answer.push(re as i32)
+    for re in 1..ticket_size + 1 {
+        let answer = res[format!("examination_{}", re)].as_str().unwrap_or("0").parse::<i32>().unwrap_or(0);
+        log_info!("{answer}");
+        vec_answer.push(answer)
     }
+    log_info!("{vec_answer:?}");
     let check = check_examination(vec_answer, 1).await;
     let result = match check {
         true => "考试通过".to_string(),
