@@ -35,6 +35,12 @@ pub struct ExaminationCheckTemplate {
     pub result: String,
 }
 
+#[derive(Template)]
+#[template(path = "public/setting.html")]
+pub struct PublicSettingTemplate {
+    pub title: String,
+}
+
 pub fn headers() -> AppendHeaders<[(HeaderName, &'static str); 4]> {
     let headers = AppendHeaders([
         (header::CONTENT_TYPE, "application/json"),

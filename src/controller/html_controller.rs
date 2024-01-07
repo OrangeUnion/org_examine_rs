@@ -55,6 +55,13 @@ pub async fn examination_check(Form(res): Form<Value>) -> impl IntoResponse {
     Html(template)
 }
 
+pub async fn public_setting() -> impl IntoResponse {
+    let template = http::PublicSettingTemplate {
+        title: "账户设置".to_string()
+    }.to_string();
+    Html(template)
+}
+
 pub async fn router(app_router: Router) -> Router {
     app_router
         .route("/", get(index))
@@ -62,4 +69,5 @@ pub async fn router(app_router: Router) -> Router {
         .route("/examination_client", get(examination_client))
         .route("/examination_update", get(examination_update))
         .route("/examination_check", post(examination_check))
+        .route("/public_setting", get(public_setting))
 }
