@@ -7,18 +7,16 @@ use crate::app::get_pool;
 use crate::{log_error, log_info, log_link, log_warn};
 use crate::util::permission;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Users {
-    pub users: Vec<User>,
-}
+pub type Users = Vec<User>;
 
 #[derive(Clone, Debug, Serialize, Deserialize, sqlx::FromRow)]
 pub struct User {
-    pub id: i32,
+    pub id: i64,
     pub username: String,
     pub password: String,
-    pub status: i32,
-    pub r#type: i32,
+    pub status: i64,
+    pub r#type: i64,
+    pub union_id: i64,
     pub expire_time: DateTime<Local>,
     pub create_time: DateTime<Local>,
 }
@@ -31,6 +29,7 @@ impl Default for User {
             password: "".to_string(),
             status: 0,
             r#type: 0,
+            union_id: -1,
             expire_time: DateTime::default(),
             create_time: Local::now(),
         }
@@ -40,14 +39,6 @@ impl Default for User {
 impl Display for User {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "User ([ID: {}], [Username: {}], [Password: {}], [Status: {}], [Type: {}])", self.id, self.username, self.password, self.status, self.r#type)
-    }
-}
-
-impl Users {
-    fn from(vec_user: Vec<User>) -> Self {
-        Self {
-            users: vec_user,
-        }
     }
 }
 
@@ -98,7 +89,7 @@ pub async fn check_login(username: &str, password: &str) -> Value {
                 return json!({
                     "mag": "Login Failed",
                     "is_login": false
-                })
+                });
             };
             let (_role_names, role_urls) = permission::list_user_roles(username).await;
             let token = permission::encode_password(format!("{}{:?}", username, role_urls).as_str());
@@ -109,6 +100,7 @@ pub async fn check_login(username: &str, password: &str) -> Value {
                 "username": res.username,
                 "is_login": true,
                 "roles": role_urls,
+                "union_id": res.union_id,
                 "token": token
             })
         }

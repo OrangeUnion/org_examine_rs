@@ -2,17 +2,14 @@ use std::fmt::Display;
 use serde::{Deserialize, Serialize};
 use crate::app::get_pool;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Groups {
-    pub groups: Vec<Group>,
-}
+pub type Groups = Vec<Group>;
 
 #[derive(Clone, Debug, Serialize, Deserialize, sqlx::FromRow)]
 pub struct Group {
-    pub id: i32,
+    pub id: i64,
     pub title: String,
     pub name: String,
-    pub status: i32,
+    pub status: i64,
 }
 
 impl Default for Group {
@@ -29,14 +26,6 @@ impl Default for Group {
 impl Display for Group {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "Group ([ID: {}], [Title: {}], [Name: {}], [Status: {}])", self.id, self.title, self.name, self.status)
-    }
-}
-
-impl Groups {
-    fn from(vec_group: Vec<Group>) -> Self {
-        Self {
-            groups: vec_group,
-        }
     }
 }
 

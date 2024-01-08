@@ -3,26 +3,23 @@ use serde::{Deserialize, Serialize};
 use crate::app::get_pool;
 use crate::{log_error, util};
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Papers {
-    pub papers: Vec<Paper>,
-}
+pub type Papers = Vec<Paper>;
 
 #[derive(Clone, Debug, Serialize, Deserialize, sqlx::FromRow)]
 pub struct Paper {
-    pub id: i32,
+    pub id: i64,
     pub title: String,
-    pub status: i32,
-    pub union_id: i32,
+    pub status: i64,
+    pub union_id: i64,
     pub create_time: NaiveDateTime,
     pub update_time: NaiveDateTime,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct UpdatePaper {
-    pub id: i32,
+    pub id: i64,
     pub title: String,
-    pub union_id: i32,
+    pub union_id: i64,
 }
 
 impl Default for Paper {
@@ -38,15 +35,7 @@ impl Default for Paper {
     }
 }
 
-impl Papers {
-    fn from(vec_examines_paper: Vec<Paper>) -> Self {
-        Self {
-            papers: vec_examines_paper,
-        }
-    }
-}
-
-pub async fn select_examine_paper_by_union(union_id: i32) -> Papers {
+pub async fn select_papers_by_union(union_id: i64) -> Papers {
     let conn = get_pool().await.expect("Link Pool Error");
     let sql = "select * from org_paper where union_id = ?";
     let response = sqlx::query_as::<_, Paper>(sql)
@@ -59,7 +48,7 @@ pub async fn select_examine_paper_by_union(union_id: i32) -> Papers {
     Papers::from(res)
 }
 
-pub async fn select_examine_paper_by_id(id: i32) -> Paper {
+pub async fn select_paper_by_id(id: i64) -> Paper {
     let conn = get_pool().await.expect("Link Pool Error");
     let sql = "select * from org_paper where id = ?";
     let response = sqlx::query_as::<_, Paper>(sql)
@@ -71,7 +60,7 @@ pub async fn select_examine_paper_by_id(id: i32) -> Paper {
     }
 }
 
-pub async fn insert_examine_paper(title: &str, union_id: i32) -> u64 {
+pub async fn insert_paper(title: &str, union_id: i64) -> u64 {
     let conn = get_pool().await.expect("Link Pool Error");
     let datetime = util::datatime::now_beijing_time();
     let sql = "INSERT INTO org_paper (title, union_id, create_time, update_time) VALUES (?, ?, ?, ?)";
@@ -90,7 +79,7 @@ pub async fn insert_examine_paper(title: &str, union_id: i32) -> u64 {
     }
 }
 
-pub async fn update_examine_paper(id: i32, title: &str, union_id: i32) -> u64 {
+pub async fn update_paper(id: i64, title: &str, union_id: i64) -> u64 {
     let title_update = match title {
         "" => { "".to_string() }
         _ => { format!("title = '{}', ", title) }
@@ -115,7 +104,7 @@ pub async fn update_examine_paper(id: i32, title: &str, union_id: i32) -> u64 {
     }
 }
 
-pub async fn delete_examine_paper(id: i32) -> u64 {
+pub async fn delete_paper(id: i64) -> u64 {
     let conn = get_pool().await.expect("Link Pool Error");
     let sql = "delete from org_paper where id = ?";
     let delete_examine_sql = "delete from org_examine where paper_id = ?";

@@ -16,8 +16,8 @@
     <title>ORG 管理系统 - {{title}}</title>
 </head>
 <body class="bg-slate-50">
-<div class="box-border rounded-3xl container mx-auto bg-purple-50 hover:shadow-xl shadow-lg shadow-purple-50s duration-300 2xl:w-4/12 xl:w-4/12 lg:w-5/12 md:w-8/12 sm:w-11/12 w-11/12 m-40 p-6">
-    <div class="antialiased tracking-widest font-thin text-purple-800 text-2xl font-bold p-8 text-center">
+<div class="box-border rounded-3xl container mx-auto bg-gradient-to-r from-purple-50 to-violet-50 hover:shadow-xl shadow-lg shadow-purple-50s duration-300 2xl:w-4/12 xl:w-4/12 lg:w-5/12 md:w-8/12 sm:w-11/12 w-11/12 m-40 p-6">
+    <div class="tracking-widest font-thin text-purple-800 text-2xl font-bold p-8 text-center">
         Org 管理系统
     </div>
     <form class="flex justify-center flex-col content-center" id="loginForm">
@@ -35,14 +35,23 @@
         </div>
         <div class="container mx-auto p-6 text-center">
             <button type="submit"
-                    class="antialiased tracking-widest font-semibold bg-purple-500 text-base hover:bg-purple-400 active:bg-purple-600 bg-fixed rounded-full text-slate-50 px-5 py-1 drop-shadow-md duration-300 xl:w-4/12 sm:5/12">
+                    class="tracking-widest font-semibold text-base
+                    bg-violet-500
+                    hover:bg-violet-400
+                    active:bg-violet-600
+                    bg-fixed rounded-full text-slate-50 px-5 py-1 drop-shadow-md duration-300 xl:w-4/12 sm:5/12">
                 登 录
             </button>
             <a href="/"
-                    class="inline-block antialiased tracking-widest font-semibold bg-purple-500 text-base hover:bg-purple-400 active:bg-purple-600 bg-fixed rounded-full text-slate-50 px-5 py-1 drop-shadow-md duration-300 xl:w-4/12 sm:5/12">
+                    class="inline-block tracking-widest font-semibold text-base
+                    bg-purple-500
+                    hover:bg-purple-400
+                    active:bg-purple-600
+                    bg-fixed rounded-full text-slate-50 px-5 py-1 drop-shadow-md duration-300 xl:w-4/12 sm:5/12">
                 首 页
             </a>
         </div>
+        <div class="text-center text-purple-300">测试账户: admin, 测试密码: 1</div>
     </form>
 </div>
 <script>
@@ -70,6 +79,7 @@
                     if (xhr.status === 200 && responseData.is_login) {
                         console.log('Link successful!');
                         sessionStorage.setItem('token', responseData.token)
+                        sessionStorage.setItem('union_id', responseData.union_id)
                         window.location.href = '/'; // 登录成功，跳转到指定页面
                     } else {
                         console.error('Login failed:', xhr.responseText);

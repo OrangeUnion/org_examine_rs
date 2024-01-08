@@ -20,25 +20,33 @@
 <div class="box-border rounded-3xl bg-gradient-to-r from-purple-100 to-violet-100 hover:shadow-xl shadow-lg shadow-zinc-50s duration-300 p-3 m-5">
     <label>
         <input class="text-purple-900 outline-none rounded-full bg-white border-solid border-inherit hover:border-none active:border-solid shadow hover:shadow-md duration-300 w-full h-10 px-3"
-               id="paper_title" name="paper_title" type="text"/>
+               id="problem" name="problem" type="text"/>
     </label>
     <button class="my-3 border border-purple-600 text-purple-600 text-base hover:bg-purple-600 hover:text-purple-50 active:bg-purple-700 bg-fixed rounded-lg px-8 py-1 drop-shadow-md duration-300"
             onclick="insert()">
         新增
     </button>
-    <a href="/"
+    <a href="/paper/{{paper_id}}"
        class="m-2 inline-block border border-purple-600 text-purple-600 text-base hover:bg-purple-600 hover:text-purple-50 active:bg-purple-700 bg-fixed rounded-lg px-8 py-1 drop-shadow-md duration-300">
-        首页
+        返回
     </a>
 </div>
 <div class="flex justify-center items-center grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 grid-cols-1 gap-5 m-5">
-    {% for paper in papers %}
-    <button onclick="submit({{paper.id}}, '{{paper.title}}')">
+    {% for examine in examines %}
+    <a href="/examine_client">
         <div class="box-border rounded-3xl bg-gradient-to-r from-purple-100 to-violet-100 hover:shadow-xl shadow-lg shadow-zinc-50s duration-300 p-6">
-            <p class="tracking-widest text-violet-600 text-xl font-medium">{{paper.title}}</p>
-            <p class="text-violet-900 text-base">创建时间：{{paper.create_time}}</p>
+            <p class="tracking-widest text-violet-600 text-lg font-medium mb-2">{{examine.problem}}</p>
+            <div class="tracking-widest text-violet-800 text-base font-medium m-2">
+                {% for answer in examine.answers.0 %}
+                <p>[{{loop.index}}] {{answer}}</p>
+                {% endfor %}
+            </div>
+            <div class="text-violet-900 text-base mb-2">
+                <p>创建时间：{{examine.create_time}}</p>
+                <p>更新时间：{{examine.update_time}}</p>
+            </div>
         </div>
-    </button>
+    </a>
     {% endfor %}
 </div>
 </body>
@@ -54,7 +62,7 @@
             const paperTitle = paperTitleInput.value
             const xhr = new XMLHttpRequest();
 
-            xhr.open('POST', '/insert_paper', true);
+            xhr.open('POST', '/insert_examine', true);
             xhr.setRequestHeader('Content-Type', 'application/json');
 
             const data = JSON.stringify({
@@ -77,32 +85,6 @@
                 }
             };
         }
-    }
-
-    function submit(paper_id, paper_title) {
-        const form = document.createElement('form');
-        form.method = 'post';
-        form.action = '/list_paper_examines'; // 替换为你的目标 URL
-        form.style.display = 'none'; // 隐藏表单
-
-        // 添加数据字段
-        const data1 = document.createElement('input');
-        data1.type = 'number'
-        data1.name = 'paper_id'; // 替换为你的数据字段名
-        data1.value = paper_id; // 替换为你的数据
-
-        const data2 = document.createElement('input');
-        data2.type = 'hidden';
-        data2.name = 'paper_title'; // 替换为你的数据字段名
-        data2.value = paper_title; // 替换为你的数据
-
-        // 添加到表单中
-        form.appendChild(data1);
-        form.appendChild(data2);
-
-        // 添加到页面并提交
-        document.body.appendChild(form);
-        form.submit();
     }
 </script>
 </html>

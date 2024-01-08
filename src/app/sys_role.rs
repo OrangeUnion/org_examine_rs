@@ -2,17 +2,14 @@ use std::fmt::Display;
 use serde::{Deserialize, Serialize};
 use crate::app::get_pool;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Rules {
-    pub roles: Vec<Role>
-}
+pub type Roles = Vec<Role>;
 
 #[derive(Clone, Debug, Serialize, Deserialize, sqlx::FromRow)]
 pub struct Role {
-    pub id: i32,
+    pub id: i64,
     pub name: String,
     pub url: String,
-    pub status: i32
+    pub status: i64
 }
 
 impl Default for Role {
@@ -32,15 +29,7 @@ impl Display for Role {
     }
 }
 
-impl Rules {
-    fn from(vec_role: Vec<Role>) -> Self {
-        Self {
-            roles: vec_role,
-        }
-    }
-}
-
-pub async fn select_user_roles(username: &str) -> Rules {
+pub async fn select_user_roles(username: &str) -> Roles {
     let conn = get_pool().await.expect("Link Pool Error");
     let sql = "select b.* from sys_user a, sys_role b, sys_user_group c, sys_role_group d where a.username = ? and a.id = c.user_id and b.id = d.role_id and c.group_id = d.group_id;";
     let response = sqlx::query_as::<_, Role>(sql)
@@ -50,5 +39,5 @@ pub async fn select_user_roles(username: &str) -> Rules {
         Ok(r) => { r }
         Err(_) => { vec![Role::default()] }
     };
-    Rules::from(res)
+    Roles::from(res)
 }

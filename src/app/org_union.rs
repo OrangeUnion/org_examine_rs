@@ -2,16 +2,13 @@ use sqlx::types::chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
 use crate::app::get_pool;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Unions {
-    pub unions: Vec<Union>,
-}
+pub type Unions = Vec<Union>;
 
 #[derive(Clone, Debug, Serialize, Deserialize, sqlx::FromRow)]
 pub struct Union {
-    pub id: i32,
+    pub id: i64,
     pub name: String,
-    pub status: i32,
+    pub status: i64,
     pub create_time: DateTime<Local>,
     pub update_time: DateTime<Local>,
 }
@@ -24,14 +21,6 @@ impl Default for Union {
             status: 0,
             create_time: Local::now(),
             update_time: Local::now(),
-        }
-    }
-}
-
-impl Unions {
-    fn from(vec_union: Vec<Union>) -> Self {
-        Self {
-            unions: vec_union,
         }
     }
 }

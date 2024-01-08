@@ -4,20 +4,18 @@ use sqlx::types::Json;
 use crate::app::get_pool;
 use crate::{log_error, log_info, util};
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Examines {
-    pub examines: Vec<Examine>,
-}
+pub type Examines = Vec<Examine>;
+pub type UpdateExamines = Vec<UpdateExamine>;
 
 #[derive(Clone, Debug, Serialize, Deserialize, sqlx::FromRow)]
 pub struct Examine {
-    pub id: i32,
+    pub id: i64,
     pub problem: String,
     pub answers: Json<Vec<String>>,
-    pub correct_answer: i32,
-    pub problem_type: i32,
-    pub paper_id: i32,
-    pub status: i32,
+    pub correct_answer: i64,
+    pub problem_type: i64,
+    pub paper_id: i64,
+    pub status: i64,
     pub create_time: DateTime<Local>,
     pub update_time: DateTime<Local>,
 }
@@ -29,12 +27,12 @@ pub struct ExamineAnswer {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct UpdateExamine {
-    pub id: i32,
+    pub id: i64,
     pub problem: String,
     pub answers: Vec<String>,
-    pub correct_answer: i32,
-    pub problem_type: i32,
-    pub paper_id: i32,
+    pub correct_answer: i64,
+    pub problem_type: i64,
+    pub paper_id: i64,
 }
 
 impl Default for Examine {
@@ -61,14 +59,6 @@ impl Default for ExamineAnswer {
     }
 }
 
-impl Examines {
-    fn from(vec_examine: Vec<Examine>) -> Self {
-        Self {
-            examines: vec_examine,
-        }
-    }
-}
-
 pub async fn select_examines() -> Examines {
     let conn = get_pool().await.expect("Link Pool Error");
     let sql = "select * from org_examine";
@@ -84,9 +74,24 @@ pub async fn select_examines() -> Examines {
     Examines::from(res)
 }
 
-pub async fn select_examines_by_paper() -> Vec<UpdateExamine> {
-    let examines = select_examines().await.examines;
-    let mut vec_update_examine = vec![];
+pub async fn select_examines_by_paper(paper_id: i64) -> Examines {
+    let conn = get_pool().await.expect("Link Pool Error");
+    let sql = "select * from org_examine where paper_id = ?";
+    let response = sqlx::query_as::<_, Examine>(sql).bind(paper_id).fetch_all(&conn).await;
+    let res = match response {
+        Ok(r) => { r }
+        Err(_) => { vec![Examine::default()] }
+    };
+    for re in res.clone() {
+        let ans = re.answers.0;
+        log_info!("{:?}",ans)
+    }
+    Examines::from(res)
+}
+
+pub async fn select_update_examines_by_paper(paper_id: i64) -> UpdateExamines {
+    let examines = select_examines_by_paper(paper_id).await;
+    let mut vec_update_examine = UpdateExamines::new();
     for examine in examines {
         let ex = UpdateExamine {
             id: examine.id,
@@ -98,7 +103,7 @@ pub async fn select_examines_by_paper() -> Vec<UpdateExamine> {
         };
         vec_update_examine.push(ex)
     };
-    vec_update_examine
+    UpdateExamines::from(vec_update_examine)
 }
 
 pub async fn update_examine(update_examine: UpdateExamine) -> u64 {
@@ -124,10 +129,10 @@ pub async fn update_examine(update_examine: UpdateExamine) -> u64 {
     }
 }
 
-pub async fn check_examine(post_answers: Vec<i32>, org_union: i32) -> bool {
+pub async fn check_examine(post_answers: Vec<i64>, paper_id: i64) -> bool {
     let conn = get_pool().await.expect("Link Pool Error");
-    let sql = "select * from org_examine where org_union = ?";
-    let response = sqlx::query_as::<_, Examine>(sql).bind(org_union).fetch_all(&conn).await;
+    let sql = "select * from org_examine where paper_id = ?";
+    let response = sqlx::query_as::<_, Examine>(sql).bind(paper_id).fetch_all(&conn).await;
     let res = match response {
         Ok(r) => { r }
         Err(e) => {

@@ -14,7 +14,7 @@ pub fn verify_password(password: &str, data_password: &str) -> bool {
 pub async fn list_user_groups(username: &str) -> (Vec<String>, Vec<String>) {
     let groups = app::sys_group::select_user_groups(username).await;
     let (mut titles, mut names) = (Vec::new(), Vec::new());
-    let _ = groups.groups.iter().map(|group| {
+    let _ = groups.iter().map(|group| {
         let group = group.clone();
         titles.push(group.title);
         names.push(group.name);
@@ -26,7 +26,7 @@ pub async fn list_user_groups(username: &str) -> (Vec<String>, Vec<String>) {
 pub async fn list_user_roles(username: &str) -> (Vec<String>, Vec<String>) {
     let roles = app::sys_role::select_user_roles(username).await;
     let (mut names, mut urls) = (Vec::new(), Vec::new());
-    let _ = roles.roles.iter().map(|role| {
+    let _ = roles.iter().map(|role| {
         let role = role.clone();
         names.push(role.name);
         urls.push(role.url);
