@@ -7,7 +7,10 @@ use tokio::io::AsyncReadExt;
 pub mod sys_user;
 pub mod sys_group;
 pub mod sys_role;
-pub mod org_examination;
+pub mod org_examine;
+pub mod org_examine_paper;
+pub mod org_union;
+pub mod org_examine_submit;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Config {

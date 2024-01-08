@@ -20,16 +20,16 @@
 <div class="container mx-auto justify-center items-center m-10 lg:w-8/12 w-11/12">
     <div class="flex grid box-border rounded-3xl bg-purple-50 hover:shadow-xl shadow-lg shadow-purple-50s duration-300 p-6">
         <span class="m-5 antialiased tracking-widest text-purple-800 text-3xl text-center font-medium">考试系统</span>
-        <form method="post" action="/examination_check">
-            <input type="hidden" name="ticket_size" value="{{examinations.len()}}">
-            {% for examination in examinations %}
+        <form method="post" action="/examine_check">
+            <input type="hidden" name="ticket_size" value="{{examines.len()}}">
+            {% for examine in examines %}
             <div class="m-5 text-base text-purple-900">
-                <span class="mb-2">{{examination.problem}}</span>
+                <span class="mb-2">{{examine.problem}}</span>
                 <div class="mb-2 grid grid-cols-1">
-                    {% for answer in examination.answers %}
+                    {% for answer in examine.answers %}
                     <label class="p-3">
                         <input class="ring-2 ring-purple-300 ring-offset-2 w-3 h-3 hover:bg-purple-200 checked:bg-purple-500 checked:border-purple-300 focus:outline-none rounded-full duration-300 appearance-none"
-                               name="examination_{{examination.id}}" value="{{loop.index}}" type="radio" {% if loop.index == 1 %} checked {% endif %}/>
+                               name="examine_{{examine.id}}" value="{{loop.index}}" type="radio" {% if loop.index == 1 %} checked {% endif %}/>
                         <span class="p-2 text-pretty">{{answer}}</span>
                     </label>
                     {% endfor %}

@@ -1,7 +1,8 @@
 use askama::Template;
 use axum::http::{header, HeaderName};
 use axum::response::AppendHeaders;
-use crate::app::org_examination::UpdateExamination;
+use crate::app::org_examine::UpdateExamine;
+use crate::app::org_examine_paper::{Paper};
 
 #[derive(Template)]
 #[template(path = "index.html")]
@@ -16,23 +17,43 @@ pub struct LoginTemplate {
 }
 
 #[derive(Template)]
-#[template(path = "examination/client.html")]
-pub struct ExaminationClientTemplate {
+#[template(path = "examine/client.html")]
+pub struct ExamineClientTemplate {
     pub title: String,
-    pub examinations: Vec<UpdateExamination>,
+    pub examines: Vec<UpdateExamine>,
 }
 
 #[derive(Template)]
-#[template(path = "examination/update.html")]
-pub struct ExaminationUpdateTemplate {
+#[template(path = "examine/update.html")]
+pub struct ExamineUpdateTemplate {
     pub title: String,
 }
 
 #[derive(Template)]
-#[template(path = "examination/check.html")]
-pub struct ExaminationCheckTemplate {
+#[template(path = "examine/check.html")]
+pub struct ExamineCheckTemplate {
     pub title: String,
     pub result: String,
+}
+
+#[derive(Template)]
+#[template(path = "paper/index.html")]
+pub struct PaperTemplate {
+    pub title: String,
+    pub papers: Vec<Paper>,
+}
+
+#[derive(Template)]
+#[template(path = "paper/insert.html")]
+pub struct PaperInsertTemplate {
+    pub title: String,
+}
+
+#[derive(Template)]
+#[template(path = "paper/update.html")]
+pub struct PaperUpdateTemplate {
+    pub title: String,
+    pub paper: Paper,
 }
 
 #[derive(Template)]

@@ -2,7 +2,7 @@ use std::fmt::Display;
 use std::vec;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use sqlx::{types::chrono::DateTime, types::chrono::Local};
+use sqlx::types::chrono::{DateTime, Local};
 use crate::app::get_pool;
 use crate::{log_error, log_info, log_link, log_warn};
 use crate::util::permission;
