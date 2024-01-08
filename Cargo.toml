@@ -8,18 +8,28 @@ edition = "2021"
 [dependencies]
 serde_json = "*"
 serde_yaml = "*"
-chrono = { version = "*", features = ["serde"] }
-ring = { version = "0.17.7", features = ["default"] }
-bcrypt = "*"
-tower = { version = "*" }
-tower-http = { version = "*", features = ["cors", "trace"] }
-askama = { version = "*", features = ["with-axum", "serde-json", "serde"] }
 askama_axum = "*"
-axum_session = { version = "*", features = ["key-store"] }
+bcrypt = "*"
+
+[dependencies.tokio]
+version = "*"
+features = ["full"]
+
+[dependencies.tower]
+version = "*"
+features = ["full"]
+
+[dependencies.tower-http]
+version = "*"
+features = ["full"]
 
 [dependencies.axum]
 version = "*"
 features = ["json", "multipart", "tokio", "ws", "form"]
+
+[dependencies.askama]
+version = "*"
+features = ["default","with-axum","serde","serde-json"]
 
 [dependencies.serde]
 version = "*"
@@ -29,10 +39,14 @@ features = ["derive"]
 version = "*"
 features = ["default", "mysql", "runtime-tokio", "chrono", "json"]
 
-[dependencies.tokio]
+[dependencies.redis]
 version = "*"
-features = ["full"]
+features = ["default"]
 
 [dependencies.reqwest]
 version = "*"
 features = ["serde_json", "cookies", "json"]
+
+[dependencies.chrono]
+version = "*"
+features = ["serde"]

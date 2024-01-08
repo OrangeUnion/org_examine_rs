@@ -1,5 +1,4 @@
 use axum::Router;
-use axum_session::{SessionConfig, SessionLayer, SessionNullPool, SessionStore};
 use tower_http::cors::CorsLayer;
 use crate::*;
 
@@ -13,15 +12,12 @@ pub async fn run() {
     let address = format!("0.0.0.0:{port}");
     log_info!("启动参数: {address}");
 
-    let session_config = SessionConfig::default().with_table_name("session_table");
-    let session_store = SessionStore::<SessionNullPool>::new(None, session_config).await.unwrap();
-
     let mut app = Router::new();
     app = sys_controller::router(app).await;
     app = org_controller::router(app).await;
     app = html_controller::router(app).await;
     app = test_controller::router(app).await;
-    app = app.layer(CorsLayer::permissive()).layer(SessionLayer::new(session_store));
+    app = app.layer(CorsLayer::permissive());
 
     // run our app with hyper, listening globally on port 3000
     let listener = tokio::net::TcpListener::bind(address).await.unwrap();
