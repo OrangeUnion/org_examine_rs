@@ -20,7 +20,7 @@
     <span class="text-xl font-semibold text-purple-600">Org 平台</span>
     <div class="flex justify-end w-auto">
         <a href="/login"
-           class="border border-violet-600 text-violet-600 text-base hover:bg-violet-600 hover:text-violet-50 active:bg-violet-700 bg-fixed rounded-lg px-5 py-1 drop-shadow-md duration-300">
+           class="border bg-violet-500 border-violet-500 text-violet-50 text-base hover:bg-violet-600 hover:text-violet-50 active:bg-violet-700 bg-fixed rounded-lg px-5 py-1 drop-shadow-md duration-300">
             登 录
         </a>
     </div>
@@ -31,32 +31,31 @@
         <form id="update_examine">
             <input type="hidden" name="id" value="{{examine.id}}">
             <input type="hidden" name="paper_id" value="{{examine.paper_id}}">
-            <span class="text-purple-900 text-lg">题目</span>
-            <label class="my-5">
-                <input name="problem" value="{{examine.problem}}"
-                       class="m-5 text-purple-900 outline-none rounded-full bg-white border-solid border-inherit
+            <label class="my-3 flex justify-center item-center">
+                <textarea name="problem" rows="4"
+                       class="my-2 text-purple-900 outline-none rounded bg-white border-solid border-inherit
                        hover:border-none active:border-solid
-                       shadow hover:shadow-md duration-300 h-10 px-3 w-11/12">
+                       shadow hover:shadow-md duration-300 min-h-20 px-3 w-full">{{examine.problem}}</textarea>
             </label>
             <div id="list_answers" class="grid grid-cols-1 flex space-y-5">
                 {% for answer in examine.answers.0 %}
-                <label class="flex items-center">
+                <label class="flex justify-center items-center">
                     <input type="radio" id="answer_{{loop.index}}"
                            name="correct_answer"
                            value="{{loop.index}}"
-                           class="m-3 ring-2 ring-purple-300 ring-offset-2 w-3 h-3
+                           class="my-1 ring-2 ring-purple-300 ring-offset-2 w-3 h-3
                 checked:bg-purple-500 checked:border-purple-300
                 hover:bg-purple-400 focus:outline-none rounded-full duration-300 appearance-none"
                            {% if loop.index.eq(correct_answer) %} checked {% endif %}>
                     <input name="answers" value="{{answer}}"
-                           class="mx-3 text-purple-900 outline-none rounded-full bg-white border-solid border-inherit
+                           class="mx-2 text-purple-900 outline-none rounded-full bg-white border-solid border-inherit
                        hover:border-none active:border-solid
                        shadow hover:shadow-md duration-300 w-11/12 h-10 px-3">
-                    <button onclick="deleteParent(this)" class="tracking-widest font-semibold
+                    <button onclick="deleteParent(this)" class="tracking-widest font-bold
                     bg-red-500
                     hover:bg-red-400
                     active:bg-red-600
-                    bg-fixed rounded-full text-slate-50 w-5 h-5 drop-shadow-md duration-300">-
+                    bg-fixed rounded-full text-slate-50 w-5 h-5 drop-shadow-md duration-300">
                     </button>
                 </label>
                 {% endfor %}
