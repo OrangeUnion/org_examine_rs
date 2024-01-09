@@ -35,6 +35,18 @@ impl Default for Paper {
     }
 }
 
+pub async fn select_papers() -> Papers {
+    let conn = get_pool().await.expect("Link Pool Error");
+    let sql = "select * from org_paper";
+    let response = sqlx::query_as::<_, Paper>(sql)
+        .fetch_all(&conn).await;
+    let res = match response {
+        Ok(r) => { r }
+        Err(_) => { vec![Paper::default()] }
+    };
+    Papers::from(res)
+}
+
 pub async fn select_papers_by_union(union_id: i64) -> Papers {
     let conn = get_pool().await.expect("Link Pool Error");
     let sql = "select * from org_paper where union_id = ?";

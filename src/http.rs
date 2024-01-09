@@ -1,8 +1,9 @@
 use askama::Template;
 use axum::http::{header, HeaderName};
 use axum::response::AppendHeaders;
-use crate::app::org_examine::{Examines, UpdateExamines};
+use crate::app::org_examine::{Examine, Examines, UpdateExamines};
 use crate::app::org_paper::{Paper, Papers};
+use crate::app::org_union::Unions;
 
 #[derive(Template)]
 #[template(path = "index.html")]
@@ -43,6 +44,8 @@ pub struct ExaminePaperTemplate {
 #[template(path = "examine/update.html")]
 pub struct ExamineUpdateTemplate {
     pub title: String,
+    pub examine: Examine,
+    pub correct_answer: usize,
 }
 
 #[derive(Template)]
@@ -70,6 +73,13 @@ pub struct PaperInsertTemplate {
 pub struct PaperUpdateTemplate {
     pub title: String,
     pub paper: Paper,
+}
+
+#[derive(Template)]
+#[template(path = "union/index.html")]
+pub struct UnionTemplate {
+    pub title: String,
+    pub unions: Unions,
 }
 
 #[derive(Template)]

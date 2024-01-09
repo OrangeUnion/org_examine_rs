@@ -23,14 +23,14 @@
             <span class="tracking-widest text-violet-600 text-4xl font-medium">考试系统</span>
         </div>
     </a>
-    <a href="/paper/1">
+    <a href="#" onclick="paper()">
         <div class="flex justify-center items-center box-border rounded-3xl bg-gradient-to-r from-violet-100 to-purple-100 hover:shadow-xl shadow-lg shadow-zinc-50s duration-300 p-6 h-36">
             <span class="tracking-widest text-violet-600 text-4xl font-medium">考卷管理</span>
         </div>
     </a>
-    <a href="/public_setting">
+    <a href="/list_union">
         <div class="flex justify-center items-center box-border rounded-3xl bg-gradient-to-r from-purple-100 to-violet-100 hover:shadow-xl shadow-lg shadow-zinc-50s duration-300 p-6 h-36">
-            <span class="tracking-widest text-violet-600 text-4xl font-medium">账户设置</span>
+            <span class="tracking-widest text-violet-600 text-4xl font-medium">联盟列表</span>
         </div>
     </a>
     <a href="/logout" onclick="logout()">
@@ -41,6 +41,12 @@
 </div>
 </body>
 <script>
+    function paper() {
+        const union_id = sessionStorage.getItem('union_id')
+        const url = '/paper/' + union_id
+        console.log(url)
+        window.location.href = url
+    }
     function logout() {
         sessionStorage.removeItem('token')
         window.location.href = '/login'

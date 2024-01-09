@@ -5,9 +5,9 @@
         document.addEventListener('DOMContentLoaded', function () {
             // 在页面加载前触发的逻辑
             if (sessionStorage.getItem('token') === null) {
-                return window.location.href = '/login';
+                return window.location.href = '/login'
             }
-        });
+        })
     </script>
     <meta charset="UTF-8">
     <meta charset="UTF-8">
@@ -28,13 +28,153 @@
 <div class="container mx-auto justify-center items-center m-10 lg:w-8/12 w-11/12">
     <div class="flex grid box-border rounded-3xl bg-purple-50 hover:shadow-xl shadow-lg shadow-purple-50s duration-300 p-6">
         <span class="m-5 tracking-widest text-purple-800 text-3xl text-center font-medium">考题配置</span>
-
-        <div class="m-5 flex justify-center text-center">
-            <a href="/" class="w-48 border border-purple-600 text-purple-600 text-base hover:bg-purple-600 hover:text-purple-50 active:bg-purple-700 bg-fixed rounded-lg px-5 py-1 drop-shadow-md duration-300">
-                返回
-            </a>
-        </div>
+        <form id="update_examine">
+            <input type="hidden" name="id" value="{{examine.id}}">
+            <input type="hidden" name="paper_id" value="{{examine.paper_id}}">
+            <span class="text-purple-900 text-lg">题目</span>
+            <label class="my-5">
+                <input name="problem" value="{{examine.problem}}"
+                       class="m-5 text-purple-900 outline-none rounded-full bg-white border-solid border-inherit
+                       hover:border-none active:border-solid
+                       shadow hover:shadow-md duration-300 h-10 px-3 w-11/12">
+            </label>
+            <div id="list_answers" class="grid grid-cols-1 flex space-y-5">
+                {% for answer in examine.answers.0 %}
+                <label class="flex items-center">
+                    <input type="radio" id="answer_{{loop.index}}"
+                           name="correct_answer"
+                           value="{{loop.index}}"
+                           class="m-3 ring-2 ring-purple-300 ring-offset-2 w-3 h-3
+                checked:bg-purple-500 checked:border-purple-300
+                hover:bg-purple-400 focus:outline-none rounded-full duration-300 appearance-none"
+                           {% if loop.index.eq(correct_answer) %} checked {% endif %}>
+                    <input name="answers" value="{{answer}}"
+                           class="mx-3 text-purple-900 outline-none rounded-full bg-white border-solid border-inherit
+                       hover:border-none active:border-solid
+                       shadow hover:shadow-md duration-300 w-11/12 h-10 px-3">
+                    <button onclick="deleteParent(this)" class="tracking-widest font-semibold
+                    bg-red-500
+                    hover:bg-red-400
+                    active:bg-red-600
+                    bg-fixed rounded-full text-slate-50 w-5 h-5 drop-shadow-md duration-300">-
+                    </button>
+                </label>
+                {% endfor %}
+            </div>
+            <div class="m-5 flex justify-center text-center">
+                <button type="submit" onclick="addNewLabel()"
+                        class="m-3 border border-green-600 text-green-600 text-base hover:bg-green-600 hover:text-green-50 active:bg-green-700 bg-fixed rounded-lg px-5 py-1 drop-shadow-md duration-300">
+                    添加
+                </button>
+                <button type="submit"
+                        class="my-3 border border-purple-600 text-purple-600 text-base hover:bg-purple-600 hover:text-purple-50 active:bg-purple-700 bg-fixed rounded-lg px-5 py-1 drop-shadow-md duration-300">
+                    提交
+                </button>
+                <a href="#" onclick="backup()"
+                   class="m-3 border border-red-600 text-red-600 text-base hover:bg-red-600 hover:text-red-50 active:bg-red-700 bg-fixed rounded-lg px-5 py-1 drop-shadow-md duration-300">
+                    返回
+                </a>
+            </div>
+        </form>
     </div>
 </div>
+<script>
+    function backup() {
+        const union_id = sessionStorage.getItem('union_id')
+        const url = '/paper/' + union_id
+        console.log(url)
+        window.location.href = url
+    }
+
+    function addNewLabel() {
+        // 获取要添加新元素的目标 div
+        const targetDiv = document.getElementById("list_answers")
+        const labelCount = targetDiv.querySelectorAll('label').length
+
+        // 创建一个新的 label 元素
+        const newLabel = document.createElement("label")
+
+        const newRadio = document.createElement("input")
+        newRadio.type = "radio"
+        newRadio.id = "answer_" + (labelCount + 1).toString()
+        newRadio.name = "correct_answer"
+        newRadio.className = "m-3 ring-2 ring-purple-300 ring-offset-2 w-3 h-3 checked:bg-purple-500 checked:border-purple-300 hover:bg-purple-400 focus:outline-none rounded-full duration-300 appearance-none"
+        newRadio.value = (labelCount + 1).toString()
+
+        // 创建一个新的 input 元素
+        const newInput = document.createElement("input")
+        newInput.name = "answers"
+        newInput.className = "m-3 ring-2 ring-purple-300 ring-offset-2 w-3 h-3 checked:bg-purple-500 checked:border-purple-300 hover:bg-purple-400 focus:outline-none rounded-full duration-300 appearance-none"
+        newInput.placeholder = "输入内容"
+
+        // 创建一个新的 button 元素
+        const newButton = document.createElement("button")
+        newButton.textContent = "X"
+        newButton.className = "tracking-widest font-semibold bg-violet-500 hover:bg-violet-400 active:bg-violet-600 bg-fixed rounded-full text-slate-50 w-5 h-5 drop-shadow-md duration-300"
+        newButton.onclick = function() {
+            this.parentNode.remove()
+        }
+
+        // 将 input 和 button 添加到 label 元素内部
+        newLabel.appendChild(newInput)
+        newLabel.appendChild(newButton)
+
+        // 将新元素添加到目标 div 内部
+        targetDiv.appendChild(newLabel)
+    }
+
+    function deleteParent(element) {
+        // 获取要删除的父级 label 元素
+        const parentLabel = element.parentNode
+
+        // 删除父级 label 中的所有子元素
+        while (parentLabel.firstChild) {
+            parentLabel.removeChild(parentLabel.firstChild)
+        }
+    }
+
+    document.getElementById("update_examine").addEventListener("submit", function (event) {
+        // 阻止表单默认提交行为
+        event.preventDefault()
+
+        // 获取表单数据
+        let formData = new FormData(event.target)
+
+        // 将 FormData 转换为对象
+        let formDataObj = {}
+        formData.forEach(function (value, key) {
+            // 如果 key 已经存在，则将值存储为数组
+            if (formDataObj.hasOwnProperty(key)) {
+                if (!Array.isArray(formDataObj[key])) {
+                    formDataObj[key] = [formDataObj[key]]
+                }
+                formDataObj[key].push(value)
+            } else {
+                formDataObj[key] = value
+            }
+        })
+
+        // 将对象转换为 JSON 字符串
+        let jsonData = JSON.stringify(formDataObj)
+
+        // 使用 fetch 发送数据到服务器
+        fetch('/update_examine', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: jsonData
+        })
+            .then(response => {
+                // 在这里处理服务器返回的响应
+                console.log('服务器返回的响应:', response)
+                window.location.reload()
+            })
+            .catch(error => {
+                // 在这里处理发送请求的错误
+                console.error('发送请求时出错:', error)
+            })
+    })
+</script>
 </body>
 </html>

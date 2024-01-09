@@ -1,6 +1,8 @@
 use axum::{Json, Router};
+use axum::extract::Path;
 use axum::response::IntoResponse;
 use axum::routing::{get, post};
+use serde_json::Value;
 use crate::{app, http, log_info};
 use crate::app::{org_examine, org_paper};
 use crate::app::org_examine::UpdateExamine;
@@ -11,8 +13,21 @@ pub async fn list_examine() -> impl IntoResponse {
     (http::headers(), Json(data))
 }
 
-pub async fn update_examine(Json(update): Json<UpdateExamine>) -> impl IntoResponse {
-    let data = app::org_examine::update_examine(update).await;
+pub async fn update_examine(Json(res): Json<Value>) -> impl IntoResponse {
+    log_info!("{res}");
+    let mut vec_answers = vec![];
+    for answer in res["answers"].as_array().unwrap() {
+        vec_answers.push(answer.as_str().unwrap_or("").to_string())
+    };
+    let update = UpdateExamine {
+        id: res["id"].as_str().unwrap_or("0").parse::<i64>().unwrap_or(0),
+        problem: res["problem"].as_str().unwrap_or("").to_string(),
+        answers: vec_answers,
+        correct_answer: res["correct_answer"].as_str().unwrap_or("0").parse::<i64>().unwrap_or(0),
+        problem_type: 1,
+        paper_id: res["paper_id"].as_str().unwrap_or("0").parse::<i64>().unwrap_or(0),
+    };
+    let data = org_examine::update_examine(update).await;
     (http::headers(), Json(data))
 }
 
@@ -33,6 +48,12 @@ pub async fn update_paper(Json(paper): Json<UpdatePaper>) -> impl IntoResponse {
     (http::headers(), Json(data))
 }
 
+pub async fn delete_paper(Path(id): Path<i64>) -> impl IntoResponse {
+    log_info!("删除考卷[{}]", id);
+    let data = org_paper::delete_paper(id).await;
+    (http::headers(), Json(data))
+}
+
 pub async fn router(app_router: Router) -> Router {
     app_router
         .route("/list_examine", get(list_examine))
@@ -40,4 +61,5 @@ pub async fn router(app_router: Router) -> Router {
         .route("/check_examine", post(check_examine))
         .route("/insert_paper", post(insert_paper))
         .route("/update_paper", post(update_paper))
+        .route("/delete_paper", get(delete_paper))
 }

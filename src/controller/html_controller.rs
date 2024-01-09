@@ -1,6 +1,6 @@
 use askama_axum::IntoResponse;
 use axum::response::Html;
-use axum::{Form, Json, Router};
+use axum::{Form, Router};
 use axum::extract::Path;
 use axum::routing::{get, post};
 use rand::Rng;
@@ -55,9 +55,12 @@ pub async fn list_paper_examines(Form(res): Form<Value>) -> impl IntoResponse {
     Html(template)
 }
 
-pub async fn examine_update() -> impl IntoResponse {
+pub async fn examine_update(Path(id): Path<i64>) -> impl IntoResponse {
+    let examine = org_examine::select_examine(id).await;
     let template = http::ExamineUpdateTemplate {
-        title: "考题配置".to_string()
+        title: "考题配置".to_string(),
+        examine: examine.clone(),
+        correct_answer: examine.correct_answer as usize,
     }.to_string();
     Html(template)
 }
@@ -85,9 +88,13 @@ pub async fn examine_check(Form(res): Form<Value>) -> impl IntoResponse {
 }
 
 pub async fn papers(Path(union_id): Path<i64>) -> impl IntoResponse {
+    let papers = match union_id {
+        0 => org_paper::select_papers().await,
+        _ => org_paper::select_papers_by_union(union_id).await,
+    };
     let template = http::PaperTemplate {
         title: "考卷列表".to_string(),
-        papers: org_paper::select_papers_by_union(union_id).await,
+        papers,
     }.to_string();
     Html(template)
 }
@@ -114,6 +121,14 @@ pub async fn public_setting() -> impl IntoResponse {
     Html(template)
 }
 
+pub async fn list_union() -> impl IntoResponse {
+    let template = http::UnionTemplate {
+        title: "联盟列表".to_string(),
+        unions: org_union::select_all_union().await,
+    }.to_string();
+    Html(template)
+}
+
 pub async fn router(app_router: Router) -> Router {
     app_router
         .route("/", get(index))
@@ -121,10 +136,11 @@ pub async fn router(app_router: Router) -> Router {
         .route("/examine_start", get(examine_start))
         .route("/examine_client/:union_id/:user", get(examine_client))
         .route("/list_paper_examines", post(list_paper_examines))
-        .route("/examine_update", get(examine_update))
+        .route("/examine_update/:id", get(examine_update))
         .route("/examine_check", post(examine_check))
         .route("/paper/:union_id", get(papers))
         .route("/paper_insert", get(paper_insert))
         .route("/paper_update", post(paper_update))
+        .route("/list_union", get(list_union))
         .route("/public_setting", get(public_setting))
 }

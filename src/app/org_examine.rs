@@ -74,6 +74,18 @@ pub async fn select_examines() -> Examines {
     Examines::from(res)
 }
 
+pub async fn select_examine(id: i64) -> Examine {
+    let conn = get_pool().await.expect("Link Pool Error");
+    let sql = "select * from org_examine where id = ?";
+    let response = sqlx::query_as::<_, Examine>(sql).bind(id).fetch_one(&conn).await;
+    let res = match response {
+        Ok(r) => { r }
+        Err(_) => { Examine::default() }
+    };
+    log_info!("{:?}",res.answers.0);
+    res
+}
+
 pub async fn select_examines_by_paper(paper_id: i64) -> Examines {
     let conn = get_pool().await.expect("Link Pool Error");
     let sql = "select * from org_examine where paper_id = ?";
@@ -108,9 +120,10 @@ pub async fn select_update_examines_by_paper(paper_id: i64) -> UpdateExamines {
 
 pub async fn update_examine(update_examine: UpdateExamine) -> u64 {
     let conn = get_pool().await.expect("Link Pool Error");
-    let answer_value = serde_json::Value::from(update_examine.answers).to_string();
-    log_info!("{answer_value}");
-    let sql = "update org_examine set problem = ?, answers = ?, correct_answer = ?, problem_type = ?, org_union = ?, update_time = ? where id = ?";
+    // answer json化
+    let answer_value = Json(update_examine.answers);
+    log_info!("json化 {answer_value:?}");
+    let sql = "update org_examine set problem = ?, answers = ?, correct_answer = ?, problem_type = ?, paper_id = ?, update_time = ? where id = ?";
     let response = sqlx::query(sql)
         .bind(update_examine.problem)
         .bind(answer_value)

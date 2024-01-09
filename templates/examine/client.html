@@ -30,7 +30,7 @@
                 <div class="mb-2 grid grid-cols-1">
                     {% for answer in examine.answers %}
                     <label class="p-3">
-                        <input class="ring-2 ring-purple-300 ring-offset-2 w-3 h-3 hover:bg-purple-200 checked:bg-purple-500 checked:border-purple-300 focus:outline-none rounded-full duration-300 appearance-none"
+                        <input class="ring-2 ring-purple-300 ring-offset-2 w-3 h-3 hover:bg-purple-400 checked:bg-purple-500 checked:border-purple-300 focus:outline-none rounded-full duration-300 appearance-none"
                                name="examine_{{examine.id}}" value="{{loop.index}}" type="radio" {% if loop.index == 1 %} checked {% endif %}/>
                         <span class="p-2 text-pretty">{{answer}}</span>
                     </label>
