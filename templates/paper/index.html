@@ -22,7 +22,7 @@
         <input class="text-purple-900 outline-none rounded-full bg-white border-solid border-inherit hover:border-none active:border-solid shadow hover:shadow-md duration-300 w-full h-10 px-3"
                id="paper_title" name="paper_title" type="text"/>
     </label>
-    <button class="my-2 border bg-green-500 border-green-500 text-green-50 text-base hover:bg-green-600 hover:text-green-50 active:bg-green-700 bg-fixed rounded-lg px-8 py-1 drop-shadow-md duration-300"
+    <button class="my-2 border bg-indigo-500 border-indigo-500 text-indigo-50 text-base hover:bg-indigo-600 hover:text-indigo-50 active:bg-indigo-700 bg-fixed rounded-lg px-8 py-1 drop-shadow-md duration-300"
             onclick="insert()">
         新增
     </button>
@@ -31,14 +31,20 @@
         首页
     </a>
 </div>
-<div class="flex justify-center items-center grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 grid-cols-1 gap-5 m-5">
+<div class="flex justify-between items-center grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 grid-cols-1 gap-5 m-5">
     {% for paper in papers %}
-    <button onclick="submit({{paper.id}}, '{{paper.title}}')">
-        <div class="box-border rounded-3xl bg-gradient-to-r from-purple-100 to-violet-100 hover:shadow-xl shadow-lg shadow-zinc-50s duration-300 p-6">
-            <p class="tracking-widest text-violet-600 text-xl font-medium">{{paper.title}}</p>
-            <p class="text-violet-900 text-base">创建时间：{{paper.create_time}}</p>
-        </div>
-    </button>
+    <div class="box-border rounded-3xl bg-gradient-to-r from-purple-100 to-violet-100 hover:shadow-xl shadow-lg shadow-zinc-50s duration-300 p-6">
+        <button onclick="submit({{paper.id}}, '{{paper.title}}')" class="my-1">
+            <span class="tracking-widest text-violet-600 text-xl font-medium">{{paper.title}}</span>
+        </button>
+        <p class="my-1 text-violet-900 text-base">创建时间：{{paper.create_time}}</p>
+        <button id="delete_paper" onclick="delete_paper('{{paper.id}}')" class="my-1 tracking-widest font-bold
+                    bg-red-500
+                    hover:bg-red-400
+                    active:bg-red-600
+                    bg-fixed rounded-full text-slate-50 px-4 py-1 drop-shadow-md duration-300">删除
+        </button>
+    </div>
     {% endfor %}
 </div>
 </body>
@@ -46,6 +52,23 @@
     function logout() {
         sessionStorage.removeItem('token')
         window.location.href = '/login'
+    }
+
+    function delete_paper(id) {
+        const confirmed = confirm("确定删除？");
+
+        if (confirmed) {
+            fetch('/delete_paper/' + id)
+                .then(response => {
+                    // 在这里处理服务器返回的响应
+                    console.log('服务器返回的响应:', response)
+                    window.location.reload()
+                })
+                .catch(error => {
+                    // 在这里处理发送请求的错误
+                    console.error('发送请求时出错:', error)
+                })
+        }
     }
 
     function insert() {

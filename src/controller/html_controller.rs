@@ -46,7 +46,10 @@ pub async fn list_paper_examines(Form(res): Form<Value>) -> impl IntoResponse {
     log_link!("{res}");
     let paper_id = res["paper_id"].as_str().unwrap_or("0").parse().unwrap_or(0);
     let paper_title = res["paper_title"].as_str().unwrap_or("");
-    let examines = org_examine::select_examines_by_paper(paper_id).await;
+    let examines = match paper_id {
+        0 => org_examine::select_examines().await,
+        _ => org_examine::select_examines_by_paper(paper_id).await,
+    };
     let template = http::ExaminePaperTemplate {
         title: paper_title.to_string(),
         paper_id,

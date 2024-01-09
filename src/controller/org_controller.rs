@@ -5,11 +5,20 @@ use axum::routing::{get, post};
 use serde_json::Value;
 use crate::{app, http, log_info};
 use crate::app::{org_examine, org_paper};
-use crate::app::org_examine::UpdateExamine;
+use crate::app::org_examine::{InsertExamine, UpdateExamine};
 use crate::app::org_paper::UpdatePaper;
 
 pub async fn list_examine() -> impl IntoResponse {
     let data = app::org_examine::select_examines().await;
+    (http::headers(), Json(data))
+}
+
+pub async fn insert_examine(Json(examine): Json<InsertExamine>) -> impl IntoResponse {
+    log_info!("{:?}", examine);
+    if examine.problem.is_empty() {
+        return (http::headers(), Json(0));
+    }
+    let data = org_examine::insert_examine(examine.problem, examine.paper_id).await;
     (http::headers(), Json(data))
 }
 
@@ -31,6 +40,12 @@ pub async fn update_examine(Json(res): Json<Value>) -> impl IntoResponse {
     (http::headers(), Json(data))
 }
 
+pub async fn delete_examine(Path(id): Path<i64>) -> impl IntoResponse {
+    log_info!("删除考题[{}]", id);
+    let data = org_examine::delete_examine(id).await;
+    (http::headers(), Json(data))
+}
+
 pub async fn check_examine(Json(answers): Json<Vec<i64>>) -> impl IntoResponse {
     let data = org_examine::check_examine(answers, 1).await;
     (http::headers(), Json(data))
@@ -38,7 +53,14 @@ pub async fn check_examine(Json(answers): Json<Vec<i64>>) -> impl IntoResponse {
 
 pub async fn insert_paper(Json(paper): Json<UpdatePaper>) -> impl IntoResponse {
     log_info!("{:?}", paper);
-    let data = org_paper::insert_paper(&paper.title, paper.union_id).await;
+    if paper.title.is_empty() {
+        return (http::headers(), Json(0));
+    }
+    let union_id = match paper.union_id {
+        0 => 1,
+        _ => paper.union_id
+    };
+    let data = org_paper::insert_paper(&paper.title, union_id).await;
     (http::headers(), Json(data))
 }
 
@@ -57,9 +79,11 @@ pub async fn delete_paper(Path(id): Path<i64>) -> impl IntoResponse {
 pub async fn router(app_router: Router) -> Router {
     app_router
         .route("/list_examine", get(list_examine))
+        .route("/insert_examine", post(insert_examine))
         .route("/update_examine", post(update_examine))
+        .route("/delete_examine/:id", get(delete_examine))
         .route("/check_examine", post(check_examine))
         .route("/insert_paper", post(insert_paper))
         .route("/update_paper", post(update_paper))
-        .route("/delete_paper", get(delete_paper))
+        .route("/delete_paper/:id", get(delete_paper))
 }

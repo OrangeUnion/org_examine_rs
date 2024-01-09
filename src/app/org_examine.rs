@@ -1,4 +1,4 @@
-use sqlx::types::chrono::{DateTime, Local};
+use sqlx::types::chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use sqlx::types::Json;
 use crate::app::get_pool;
@@ -16,13 +16,19 @@ pub struct Examine {
     pub problem_type: i64,
     pub paper_id: i64,
     pub status: i64,
-    pub create_time: DateTime<Local>,
-    pub update_time: DateTime<Local>,
+    pub create_time: NaiveDateTime,
+    pub update_time: NaiveDateTime,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, sqlx::FromRow)]
 pub struct ExamineAnswer {
     pub answer: Vec<String>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct InsertExamine {
+    pub problem: String,
+    pub paper_id: i64,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -45,8 +51,8 @@ impl Default for Examine {
             problem_type: 0,
             paper_id: 0,
             status: 0,
-            create_time: Local::now(),
-            update_time: Local::now(),
+            create_time: NaiveDateTime::default(),
+            update_time: NaiveDateTime::default(),
         }
     }
 }
@@ -118,6 +124,28 @@ pub async fn select_update_examines_by_paper(paper_id: i64) -> UpdateExamines {
     UpdateExamines::from(vec_update_examine)
 }
 
+pub async fn insert_examine(problem: String, paper_id: i64) -> u64 {
+    let conn = get_pool().await.expect("Link Pool Error");
+    let datetime = util::datatime::now_beijing_time();
+    let default_answer = Json(vec!["默认考题，请删除本题并添加"]);
+    let sql = "INSERT INTO org_examine (problem, answers, correct_answer, paper_id, create_time, update_time) VALUES (?, ?, ?, ?, ?, ?)";
+    let response = sqlx::query(sql)
+        .bind(problem)
+        .bind(default_answer)
+        .bind(1)
+        .bind(paper_id)
+        .bind(datetime)
+        .bind(datetime)
+        .execute(&conn).await;
+    match response {
+        Ok(r) => { r.rows_affected() }
+        Err(e) => {
+            log_error!("SQL Error {e}");
+            0
+        }
+    }
+}
+
 pub async fn update_examine(update_examine: UpdateExamine) -> u64 {
     let conn = get_pool().await.expect("Link Pool Error");
     // answer json化
@@ -132,6 +160,21 @@ pub async fn update_examine(update_examine: UpdateExamine) -> u64 {
         .bind(update_examine.paper_id)
         .bind(util::datatime::now_beijing_time())
         .bind(update_examine.id)
+        .execute(&conn).await;
+    match response {
+        Ok(r) => { r.rows_affected() }
+        Err(e) => {
+            log_error!("SQL Error {e}");
+            0
+        }
+    }
+}
+
+pub async fn delete_examine(id: i64) -> u64 {
+    let conn = get_pool().await.expect("Link Pool Error");
+    let sql = "delete from org_examine where id = ?";
+    let response = sqlx::query(sql)
+        .bind(id)
         .execute(&conn).await;
     match response {
         Ok(r) => { r.rows_affected() }

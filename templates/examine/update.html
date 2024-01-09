@@ -33,7 +33,7 @@
             <input type="hidden" name="paper_id" value="{{examine.paper_id}}">
             <label class="my-3 flex justify-center item-center">
                 <textarea name="problem" rows="4"
-                       class="my-2 text-purple-900 outline-none rounded bg-white border-solid border-inherit
+                          class="my-2 text-purple-900 outline-none rounded bg-white border-solid border-inherit
                        hover:border-none active:border-solid
                        shadow hover:shadow-md duration-300 min-h-20 px-3 w-full">{{examine.problem}}</textarea>
             </label>
@@ -110,7 +110,7 @@
         const newButton = document.createElement("button")
         newButton.textContent = "X"
         newButton.className = "tracking-widest font-semibold bg-violet-500 hover:bg-violet-400 active:bg-violet-600 bg-fixed rounded-full text-slate-50 w-5 h-5 drop-shadow-md duration-300"
-        newButton.onclick = function() {
+        newButton.onclick = function () {
             this.parentNode.remove()
         }
 
