@@ -74,7 +74,7 @@ pub async fn select_paper_by_id(id: i64) -> Paper {
 
 pub async fn insert_paper(title: &str, union_id: i64) -> u64 {
     let conn = get_pool().await.expect("Link Pool Error");
-    let datetime = util::datatime::now_beijing_time();
+    let datetime = util::datetime::now_beijing_time();
     let sql = "INSERT INTO org_paper (title, union_id, create_time, update_time) VALUES (?, ?, ?, ?)";
     let response = sqlx::query(sql)
         .bind(title)
@@ -101,7 +101,7 @@ pub async fn update_paper(id: i64, title: &str, union_id: i64) -> u64 {
         _ => { format!("union_id = {}, ", union_id) }
     };
     let conn = get_pool().await.expect("Link Pool Error");
-    let datetime = util::datatime::now_beijing_time();
+    let datetime = util::datetime::now_beijing_time();
     let sql = format!("update org_paper set {title_update}{union_id_update}update_time = ? where id = ?");
     let response = sqlx::query(&sql)
         .bind(datetime)

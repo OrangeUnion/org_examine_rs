@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // 在页面加载前触发的逻辑
-            if (sessionStorage.getItem('token') !== null) {
-                return window.location.href = '/';
-            }
-        });
-    </script>
+<!--    <script>-->
+<!--        document.addEventListener('DOMContentLoaded', function() {-->
+<!--            // 在页面加载前触发的逻辑-->
+<!--            if (sessionStorage.getItem('token') !== null) {-->
+<!--                return window.location.href = '/';-->
+<!--            }-->
+<!--        });-->
+<!--    </script>-->
     <meta charset="UTF-8">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -78,6 +78,7 @@
                     const responseData = JSON.parse(xhr.responseText);
                     if (xhr.status === 200 && responseData.is_login) {
                         console.log('Link successful!');
+                        sessionStorage.setItem('user', responseData.username)
                         sessionStorage.setItem('token', responseData.token)
                         sessionStorage.setItem('union_id', responseData.union_id)
                         window.location.href = '/'; // 登录成功，跳转到指定页面

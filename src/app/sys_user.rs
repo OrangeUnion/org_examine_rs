@@ -3,7 +3,7 @@ use std::vec;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use sqlx::types::chrono::{DateTime, Local};
-use crate::app::get_pool;
+use crate::app::{get_pool, redis_util};
 use crate::{log_error, log_info, log_link, log_warn};
 use crate::util::permission;
 
@@ -92,8 +92,16 @@ pub async fn check_login(username: &str, password: &str) -> Value {
                 });
             };
             let (_role_names, role_urls) = permission::list_user_roles(username).await;
-            let token = permission::encode_password(format!("{}{:?}", username, role_urls).as_str());
+            let token = permission::sha256(format!("{}{:?}", username, role_urls));
             log_link!("Login Successful");
+            let redis_user_info = redis_util::RedisUserInfo {
+                userid: res.clone().id,
+                username: res.clone().username,
+                role_urls: role_urls.clone(),
+                union_id: res.clone().union_id,
+                token: token.clone(),
+            };
+            redis_util::redis_save_session(redis_user_info).await.expect("Save Failed");
             json!({
                 "mag": "Login Successful",
                 "userid": res.id,

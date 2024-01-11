@@ -11,14 +11,14 @@
 <nav class="flex justify-between items-center bg-gradient-to-r from-purple-200 to-violet-200 p-3">
     <span class="text-xl font-semibold text-purple-600">Org 平台</span>
     <div class="flex justify-end w-auto">
-        <a href="/login"
-                class="border bg-violet-500 border-violet-500 text-violet-50 text-base hover:bg-violet-600 hover:text-violet-50 active:bg-violet-700 bg-fixed rounded-lg px-5 py-1 drop-shadow-md duration-300">
+        <a href="/login" id="to_login"
+           class="border bg-violet-500 border-violet-500 text-violet-50 text-base hover:bg-violet-600 hover:text-violet-50 active:bg-violet-700 bg-fixed rounded-lg px-5 py-1 drop-shadow-md duration-300">
             登 录
         </a>
     </div>
 </nav>
 <div class="container mx-auto flex justify-center items-center grid md:grid-cols-2 sm:grid-cols-1 grid-cols-1 gap-12 m-10 lg:w-8/12 w-11/12">
-    <a href="/examine_start">
+    <a href="#" onclick="link('/examine_start')">
         <div class="flex justify-center items-center box-border rounded-3xl bg-gradient-to-r from-purple-100 to-violet-100 hover:shadow-xl shadow-lg shadow-zinc-50s duration-300 p-6 h-36">
             <span class="tracking-widest text-violet-600 text-4xl font-medium">考试系统</span>
         </div>
@@ -28,12 +28,12 @@
             <span class="tracking-widest text-violet-600 text-4xl font-medium">考卷管理</span>
         </div>
     </a>
-    <a href="/list_union">
+    <a href="#" onclick="link('/list_union')">
         <div class="flex justify-center items-center box-border rounded-3xl bg-gradient-to-r from-purple-100 to-violet-100 hover:shadow-xl shadow-lg shadow-zinc-50s duration-300 p-6 h-36">
             <span class="tracking-widest text-violet-600 text-4xl font-medium">联盟列表</span>
         </div>
     </a>
-    <a href="/logout" onclick="logout()">
+    <a href="#" onclick="logout()">
         <div class="flex justify-center items-center box-border rounded-3xl bg-gradient-to-r from-violet-100 to-purple-100 hover:shadow-xl shadow-lg shadow-zinc-50s duration-300 p-6 h-36">
             <span class="tracking-widest text-violet-600 text-4xl font-medium">退出登录</span>
         </div>
@@ -41,15 +41,59 @@
 </div>
 </body>
 <script>
+    const username = sessionStorage.getItem('user')
+    const to_login = document.getElementById("to_login")
+    if (sessionStorage.getItem("token").length < 1) {
+        to_login.value = "登出"
+        to_login.href = "/logout"
+    } else {
+        to_login.value = "登录"
+        to_login.href = "/login"
+        /*to_login.addEventListener("click", function (event) {
+            event.preventDefault(); // 阻止默认行为（阻止跳转到 "#"）
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', '/login', true);
+            xhr.setRequestHeader('User', username); // 设置自定义的 header
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        window.location.href = xhr.responseURL; // 在接收到响应后执行页面跳转
+                    } else {
+                        console.error('请求失败');
+                    }
+                }
+            };
+            xhr.send();
+        });*/
+    }
+
+    function link(url) {
+        const params = new URLSearchParams();
+        params.append('user', sessionStorage.getItem('user'));
+        params.append('token', sessionStorage.getItem('token'));
+        const urlWithParams = url + `?${params.toString()}`;
+        console.log(urlWithParams)
+        window.location.href = urlWithParams
+    }
+
     function paper() {
+        const params = new URLSearchParams();
+        params.append('user', sessionStorage.getItem('user'));
+        params.append('token', sessionStorage.getItem('token'));
+
         const union_id = sessionStorage.getItem('union_id')
         const url = '/paper/' + union_id
-        console.log(url)
-        window.location.href = url
+        const urlWithParams = url + `?${params.toString()}`;
+        console.log(urlWithParams)
+        window.location.href = urlWithParams
     }
+
     function logout() {
+        sessionStorage.removeItem('user')
         sessionStorage.removeItem('token')
-        window.location.href = '/login'
+        sessionStorage.removeItem('union_id')
+        window.location.href = '/logout'
     }
 </script>
 </html>

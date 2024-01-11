@@ -5,9 +5,11 @@ use axum::extract::Path;
 use axum::routing::{get, post};
 use rand::Rng;
 use serde_json::Value;
+use tower_http::auth::AsyncRequireAuthorizationLayer;
 use crate::{http, log_info, log_link};
 use crate::app::org_examine::check_examine;
 use crate::app::*;
+use crate::controller::auths::*;
 
 pub async fn index() -> impl IntoResponse {
     let template = http::IndexTemplate {
@@ -134,16 +136,17 @@ pub async fn list_union() -> impl IntoResponse {
 
 pub async fn router(app_router: Router) -> Router {
     app_router
-        .route("/", get(index))
-        .route("/login", get(login))
-        .route("/examine_start", get(examine_start))
-        .route("/examine_client/:union_id/:user", get(examine_client))
         .route("/list_paper_examines", post(list_paper_examines))
         .route("/examine_update/:id", get(examine_update))
-        .route("/examine_check", post(examine_check))
         .route("/paper/:union_id", get(papers))
         .route("/paper_insert", get(paper_insert))
         .route("/paper_update", post(paper_update))
         .route("/list_union", get(list_union))
         .route("/public_setting", get(public_setting))
+        .layer(AsyncRequireAuthorizationLayer::new(TokenAuth))
+        .route("/", get(index))
+        .route("/login", get(login).layer(AsyncRequireAuthorizationLayer::new(LoginAuth)))
+        .route("/examine_start", get(examine_start))
+        .route("/examine_client/:union_id/:user", get(examine_client))
+        .route("/examine_check", post(examine_check))
 }

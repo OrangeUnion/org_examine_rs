@@ -1,3 +1,5 @@
+use crypto::digest::Digest;
+use crypto::sha2::Sha256;
 use serde_json::{json, Value};
 use crate::app;
 
@@ -9,6 +11,13 @@ pub fn encode_password(password: &str) -> String {
 pub fn verify_password(password: &str, data_password: &str) -> bool {
     let verify = bcrypt::verify(password, data_password);
     verify.expect("is Err ")
+}
+
+pub fn sha256(text: String) -> String {
+    // 创建 Sha256 实例
+    let mut hasher = Sha256::new();
+    hasher.input_str(&text);
+    hasher.result_str()
 }
 
 pub async fn list_user_groups(username: &str) -> (Vec<String>, Vec<String>) {

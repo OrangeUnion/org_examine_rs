@@ -126,7 +126,7 @@ pub async fn select_update_examines_by_paper(paper_id: i64) -> UpdateExamines {
 
 pub async fn insert_examine(problem: String, paper_id: i64) -> u64 {
     let conn = get_pool().await.expect("Link Pool Error");
-    let datetime = util::datatime::now_beijing_time();
+    let datetime = util::datetime::now_beijing_time();
     let default_answer = Json(vec!["默认考题，请删除本题并添加"]);
     let sql = "INSERT INTO org_examine (problem, answers, correct_answer, paper_id, create_time, update_time) VALUES (?, ?, ?, ?, ?, ?)";
     let response = sqlx::query(sql)
@@ -158,7 +158,7 @@ pub async fn update_examine(update_examine: UpdateExamine) -> u64 {
         .bind(update_examine.correct_answer)
         .bind(update_examine.problem_type)
         .bind(update_examine.paper_id)
-        .bind(util::datatime::now_beijing_time())
+        .bind(util::datetime::now_beijing_time())
         .bind(update_examine.id)
         .execute(&conn).await;
     match response {

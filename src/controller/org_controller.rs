@@ -9,7 +9,7 @@ use crate::app::org_examine::{InsertExamine, UpdateExamine};
 use crate::app::org_paper::UpdatePaper;
 
 pub async fn list_examine() -> impl IntoResponse {
-    let data = app::org_examine::select_examines().await;
+    let data = org_examine::select_examines().await;
     (http::headers(), Json(data))
 }
 
