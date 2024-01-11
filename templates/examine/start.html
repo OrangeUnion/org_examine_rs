@@ -70,7 +70,8 @@
         const userInput = document.getElementById('user');
         if (userInput instanceof HTMLInputElement) {
             const user = userInput.value
-            const url = user.length > 0 ? '/examine_client/1/' + userInput.value : '/examine_start'
+            let url = user.length > 0 ? '/examine_client/1/' + userInput.value : '/examine_start';
+            url = auth_url(url)
             console.log(url)
             window.location.href = url
         }

@@ -83,7 +83,7 @@
         const confirmed = confirm("确定删除？");
 
         if (confirmed) {
-            fetch('/delete_paper/' + id)
+            fetch(auth_url('/delete_paper/') + id)
                 .then(response => {
                     // 在这里处理服务器返回的响应
                     console.log('服务器返回的响应:', response)
@@ -102,7 +102,7 @@
             const paperTitle = paperTitleInput.value
             const xhr = new XMLHttpRequest();
 
-            xhr.open('POST', '/insert_paper', true);
+            xhr.open('POST', auth_url('/insert_paper'), true);
             xhr.setRequestHeader('Content-Type', 'application/json');
 
             const data = JSON.stringify({
@@ -130,7 +130,7 @@
     function submit(paper_id, paper_title) {
         const form = document.createElement('form');
         form.method = 'post';
-        form.action = '/list_paper_examines'; // 替换为你的目标 URL
+        form.action = auth_url('/list_paper_examines'); // 替换为你的目标 URL
         form.style.display = 'none'; // 隐藏表单
 
         // 添加数据字段

@@ -184,7 +184,7 @@
         let jsonData = JSON.stringify(formDataObj)
 
         // 使用 fetch 发送数据到服务器
-        fetch('/update_examine', {
+        fetch(auth_url('/update_examine'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

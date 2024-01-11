@@ -34,7 +34,7 @@
 <div class="flex justify-center items-center grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 grid-cols-1 gap-5 m-5">
     {% for examine in examines %}
     <div class="box-border rounded-3xl bg-gradient-to-r from-purple-100 to-violet-100 hover:shadow-xl shadow-lg shadow-zinc-50s duration-300 p-6">
-        <a href="/examine_update/{{examine.id}}">
+        <a href="#" onclick="link('/examine_update/{{examine.id}}')">
             <p class="tracking-widest text-violet-600 text-lg font-medium mb-2">{{examine.problem}}</p>
             <div class="tracking-widest text-violet-800 text-base font-medium m-2">
                 {% for answer in examine.answers.0 %}
@@ -79,25 +79,6 @@
     }
 </script>
 <script>
-    function delete_examine(id) {
-        const confirmed = confirm("确定删除？");
-
-        if (confirmed) {
-            fetch('/delete_examine/' + id)
-                .then(response => {
-                    // 在这里处理服务器返回的响应
-                    console.log('服务器返回的响应:', response)
-                    const url = '/paper/' + sessionStorage.getItem('union_id')
-                    console.log('Link to ' + url)
-                    window.location.href = url
-                })
-                .catch(error => {
-                    // 在这里处理发送请求的错误
-                    console.error('发送请求时出错:', error)
-                })
-        }
-    }
-
     function paper() {
         const params = new URLSearchParams();
         params.append('user', sessionStorage.getItem('user'));
@@ -116,7 +97,7 @@
             const examineProblem = examineProblemInput.value
             const xhr = new XMLHttpRequest();
 
-            xhr.open('POST', '/insert_examine', true);
+            xhr.open('POST', auth_url('/insert_examine'), true);
             xhr.setRequestHeader('Content-Type', 'application/json');
 
             const data = JSON.stringify({
@@ -130,7 +111,7 @@
                     const responseData = JSON.parse(xhr.responseText);
                     if (xhr.status === 200) {
                         console.log('Insert successful!', responseData);
-                        const url = '/paper/' + sessionStorage.getItem('union_id')
+                        const url = auth_url('/paper/' + sessionStorage.getItem('union_id'))
                         console.log('Link to ' + url)
                         window.location.href = url
                     } else {
@@ -138,6 +119,25 @@
                     }
                 }
             };
+        }
+    }
+
+    function delete_examine(id) {
+        const confirmed = confirm("确定删除？");
+
+        if (confirmed) {
+            fetch('/delete_examine/' + id)
+                .then(response => {
+                    // 在这里处理服务器返回的响应
+                    console.log('服务器返回的响应:', response)
+                    const url = '/paper/' + sessionStorage.getItem('union_id')
+                    console.log('Link to ' + url)
+                    window.location.href = url
+                })
+                .catch(error => {
+                    // 在这里处理发送请求的错误
+                    console.error('发送请求时出错:', error)
+                })
         }
     }
 </script>
