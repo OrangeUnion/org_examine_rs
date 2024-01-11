@@ -45,6 +45,22 @@ impl Default for ExamineResult {
     }
 }
 
+pub async fn select_examine_results() -> ExamineResults {
+    let conn = get_pool().await.expect("Link Pool Error");
+    let sql = "select * from org_examine_result";
+    let response = sqlx::query_as::<_, ExamineResult>(sql)
+        .fetch_all(&conn).await;
+    let res = match response {
+        Ok(r) => { r }
+        Err(_) => { ExamineResults::default() }
+    };
+    for re in res.clone() {
+        let ans = re.answers.0;
+        log_info!("{:?}",ans)
+    }
+    ExamineResults::from(res)
+}
+
 pub async fn select_examine_results_by_union_id(union_id: i64) -> ExamineResults {
     let conn = get_pool().await.expect("Link Pool Error");
     let sql = "select * from org_examine_result where union_id = ?";

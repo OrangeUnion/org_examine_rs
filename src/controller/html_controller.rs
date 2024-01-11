@@ -46,9 +46,13 @@ pub async fn examine_client(Path((union_id, user)): Path<(i64, String)>) -> impl
 }
 
 pub async fn examine_result(Path(union_id): Path<i64>) -> impl IntoResponse {
+    let examine_results = match union_id {
+        0 => org_examine_result::select_examine_results().await,
+        _ => org_examine_result::select_examine_results_by_union_id(union_id).await,
+    };
     let template = http::ExamineResultTemplate {
         title: "考试记录".to_string(),
-        examine_results: org_examine_result::select_examine_results_by_union_id(union_id).await,
+        examine_results,
     }.to_string();
     Html(template)
 }
