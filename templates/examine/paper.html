@@ -126,7 +126,7 @@
         const confirmed = confirm("确定删除？");
 
         if (confirmed) {
-            fetch('/delete_examine/' + id)
+            fetch(auth_url('/delete_examine/' + id))
                 .then(response => {
                     // 在这里处理服务器返回的响应
                     console.log('服务器返回的响应:', response)

@@ -83,7 +83,7 @@
         const confirmed = confirm("确定删除？");
 
         if (confirmed) {
-            fetch(auth_url('/delete_paper/') + id)
+            fetch(auth_url('/delete_paper/' + id))
                 .then(response => {
                     // 在这里处理服务器返回的响应
                     console.log('服务器返回的响应:', response)
