@@ -50,11 +50,15 @@
     </div>
 </div>
 <script>
+    function auth_url(url) {
+        const params = new URLSearchParams()
+        params.append('user', sessionStorage.getItem('user'))
+        params.append('token', sessionStorage.getItem('token'))
+        return url + `?${params.toString()}`
+
+    }
     function link(url) {
-        const params = new URLSearchParams();
-        params.append('user', sessionStorage.getItem('user'));
-        params.append('token', sessionStorage.getItem('token'));
-        const urlWithParams = url + `?${params.toString()}`;
+        const urlWithParams = auth_url(url)
         console.log(urlWithParams)
         window.location.href = urlWithParams
     }
@@ -62,10 +66,7 @@
         sessionStorage.removeItem('user')
         sessionStorage.removeItem('token')
         sessionStorage.removeItem('union_id')
-        const params = new URLSearchParams();
-        params.append('user', sessionStorage.getItem('user'));
-        params.append('token', sessionStorage.getItem('token'));
-        const urlWithParams = '/logout' + `?${params.toString()}`;
+        const urlWithParams = auth_url('/logout')
         console.log(urlWithParams)
         window.location.href = urlWithParams
     }
