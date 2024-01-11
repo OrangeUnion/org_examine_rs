@@ -2,7 +2,7 @@ use askama::Template;
 use axum::http::{header, HeaderName};
 use axum::response::AppendHeaders;
 use crate::app::org_examine::{Examine, Examines, UpdateExamines};
-use crate::app::org_paper::{Paper, Papers};
+use crate::app::org_paper::Papers;
 use crate::app::org_union::Unions;
 
 #[derive(Template)]
@@ -60,19 +60,6 @@ pub struct ExamineCheckTemplate {
 pub struct PaperTemplate {
     pub title: String,
     pub papers: Papers,
-}
-
-#[derive(Template)]
-#[template(path = "paper/insert.html")]
-pub struct PaperInsertTemplate {
-    pub title: String,
-}
-
-#[derive(Template)]
-#[template(path = "paper/update.html")]
-pub struct PaperUpdateTemplate {
-    pub title: String,
-    pub paper: Paper,
 }
 
 #[derive(Template)]

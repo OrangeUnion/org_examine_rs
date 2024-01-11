@@ -1,19 +1,10 @@
 use axum::extract::Path;
 use axum::{Json, Router};
-use axum::body::Body;
-use axum::http::{header, HeaderMap, StatusCode};
-use axum::response::{AppendHeaders, IntoResponse};
+use axum::http::StatusCode;
+use axum::response::IntoResponse;
 use axum::routing::{get, post};
-use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use crate::{app, http, util};
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-struct LinkUrlInfo {
-    url: String,
-    user: String,
-    token: String,
-}
 
 pub async fn select_users() -> impl IntoResponse {
     let data = app::sys_user::select_all_user().await;
@@ -55,15 +46,6 @@ pub async fn logout() -> impl IntoResponse {
         .unwrap()
 }
 
-pub async fn link_url(Json(res): Json<LinkUrlInfo>) -> impl IntoResponse {
-    axum::http::Response::builder()
-        .status(StatusCode::FOUND)
-        .header("Location", "/login")
-        .header("user", &res.user)
-        .header("token", &res.token).body(Body::empty())
-        .unwrap()
-}
-
 pub async fn router(app_router: Router) -> Router {
     app_router
         .route("/users", get(select_users))
@@ -73,5 +55,4 @@ pub async fn router(app_router: Router) -> Router {
         .route("/list_user/:username", get(list_user))
         .route("/show_user/:username", get(show_user))
         .route("/logout", get(logout))
-        .route("/link_url", post(link_url))
 }

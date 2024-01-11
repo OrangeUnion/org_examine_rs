@@ -1,7 +1,7 @@
 use redis::{Commands, RedisResult};
 use serde::{Deserialize, Serialize};
 use crate::app::{get_config, get_redis_conn};
-use crate::{log_info, util};
+use crate::log_info;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RedisUserInfo {
@@ -35,14 +35,6 @@ impl RedisUserInfo {
         log_info!("EQ session {token}");
         self.token.eq(token)
     }
-
-    pub fn token_verify(&self, token: &str) -> bool {
-        let new = format!("{}{:?}", self.username, self.role_urls);
-        let token_eq = util::permission::encode_password(&new);
-        log_info!("EQ self {}", token_eq);
-        log_info!("EQ session {token}");
-        bcrypt::verify(token, &token_eq).unwrap_or(false)
-    }
 }
 
 pub async fn redis_save_session(redis_user_info: RedisUserInfo) -> RedisResult<bool> {
@@ -60,9 +52,4 @@ pub async fn redis_save_session(redis_user_info: RedisUserInfo) -> RedisResult<b
         .query(&mut con)?;
     con.expire(format!("org_user_{}", redis_user_info.username), get_config().await.redis_expire)?;
     Ok(true)
-}
-
-pub async fn redis_has_session(username: &str) -> bool {
-    let mut con = get_redis_conn().await.expect("Redis链接失败");
-    con.exists::<_, bool>(username).unwrap_or(false)
 }

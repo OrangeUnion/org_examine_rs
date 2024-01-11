@@ -104,21 +104,6 @@ pub async fn papers(Path(union_id): Path<i64>) -> impl IntoResponse {
     Html(template)
 }
 
-pub async fn paper_insert() -> impl IntoResponse {
-    let template = http::PaperInsertTemplate {
-        title: "考卷新增".to_string(),
-    }.to_string();
-    Html(template)
-}
-
-pub async fn paper_update(Path(id): Path<i64>) -> impl IntoResponse {
-    let template = http::PaperUpdateTemplate {
-        title: "考卷更新".to_string(),
-        paper: org_paper::select_paper_by_id(id).await,
-    }.to_string();
-    Html(template)
-}
-
 pub async fn public_setting() -> impl IntoResponse {
     let template = http::PublicSettingTemplate {
         title: "账户设置".to_string()
@@ -139,8 +124,6 @@ pub async fn router(app_router: Router) -> Router {
         .route("/list_paper_examines", post(list_paper_examines))
         .route("/examine_update/:id", get(examine_update))
         .route("/paper/:union_id", get(papers))
-        .route("/paper_insert", get(paper_insert))
-        .route("/paper_update", post(paper_update))
         .route("/list_union", get(list_union))
         .route("/public_setting", get(public_setting))
         .layer(AsyncRequireAuthorizationLayer::new(TokenAuth))

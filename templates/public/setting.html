@@ -19,7 +19,7 @@
 <nav class="flex justify-between items-center bg-gradient-to-r from-purple-200 to-violet-200 p-3">
     <span class="text-xl font-semibold text-purple-600">Org 平台</span>
     <div class="flex justify-end w-auto">
-        <a href="/login"
+        <a href="#" onclick="link('/login')"
            class="border bg-violet-500 border-violet-500 text-violet-50 text-base hover:bg-violet-600 hover:text-violet-50 active:bg-violet-700 bg-fixed rounded-lg px-5 py-1 drop-shadow-md duration-300">
             登 录
         </a>
@@ -30,11 +30,32 @@
         <span class="m-5 tracking-widest text-purple-800 text-3xl text-center font-medium">账户设置</span>
 
         <div class="m-5 flex justify-center text-center">
-            <a href="/" class="w-48 border bg-purple-500 border-purple-500 text-purple-50 text-base hover:bg-purple-600 hover:text-purple-50 active:bg-purple-700 bg-fixed rounded-lg px-5 py-1 drop-shadow-md duration-300">
+            <a href="#" onclick="link('/')" class="w-48 border bg-purple-500 border-purple-500 text-purple-50 text-base hover:bg-purple-600 hover:text-purple-50 active:bg-purple-700 bg-fixed rounded-lg px-5 py-1 drop-shadow-md duration-300">
                 返回
             </a>
         </div>
     </div>
 </div>
+<script>
+    function link(url) {
+        const params = new URLSearchParams();
+        params.append('user', sessionStorage.getItem('user'));
+        params.append('token', sessionStorage.getItem('token'));
+        const urlWithParams = url + `?${params.toString()}`;
+        console.log(urlWithParams)
+        window.location.href = urlWithParams
+    }
+    function logout() {
+        sessionStorage.removeItem('user')
+        sessionStorage.removeItem('token')
+        sessionStorage.removeItem('union_id')
+        const params = new URLSearchParams();
+        params.append('user', sessionStorage.getItem('user'));
+        params.append('token', sessionStorage.getItem('token'));
+        const urlWithParams = '/logout' + `?${params.toString()}`;
+        console.log(urlWithParams)
+        window.location.href = urlWithParams
+    }
+</script>
 </body>
 </html>

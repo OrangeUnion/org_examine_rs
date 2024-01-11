@@ -1,6 +1,24 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
+    <script>
+        const to_login = document.getElementById("to_login")
+        const newA = document.createElement("a")
+        newA.className = "border bg-violet-500 border-violet-500 text-violet-50 text-base hover:bg-violet-600 hover:text-violet-50 active:bg-violet-700 bg-fixed rounded-lg px-5 py-1 drop-shadow-md duration-300"
+        if (sessionStorage.getItem("token").length < 1){
+            newA.text = "登出"
+            newA.onclick = function () {
+                logout()
+            }
+        } else {
+            newA.text = "登录"
+            newA.onclick = function () {
+                link("/login")
+            }
+        }
+        to_login.appendChild(newA)
+
+    </script>
     <meta charset="UTF-8">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,8 +28,8 @@
 <body class="bg-slate-50">
 <nav class="flex justify-between items-center bg-gradient-to-r from-purple-200 to-violet-200 p-3">
     <span class="text-xl font-semibold text-purple-600">Org 平台</span>
-    <div class="flex justify-end w-auto">
-        <a href="/login" id="to_login"
+    <div class="flex justify-end w-auto" id="to_login">
+        <a href="#" onclick="link('/login')"
            class="border bg-violet-500 border-violet-500 text-violet-50 text-base hover:bg-violet-600 hover:text-violet-50 active:bg-violet-700 bg-fixed rounded-lg px-5 py-1 drop-shadow-md duration-300">
             登 录
         </a>
@@ -41,33 +59,6 @@
 </div>
 </body>
 <script>
-    const username = sessionStorage.getItem('user')
-    const to_login = document.getElementById("to_login")
-    if (sessionStorage.getItem("token").length < 1) {
-        to_login.value = "登出"
-        to_login.href = "/logout"
-    } else {
-        to_login.value = "登录"
-        to_login.href = "/login"
-        /*to_login.addEventListener("click", function (event) {
-            event.preventDefault(); // 阻止默认行为（阻止跳转到 "#"）
-
-            const xhr = new XMLHttpRequest();
-            xhr.open('GET', '/login', true);
-            xhr.setRequestHeader('User', username); // 设置自定义的 header
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === XMLHttpRequest.DONE) {
-                    if (xhr.status === 200) {
-                        window.location.href = xhr.responseURL; // 在接收到响应后执行页面跳转
-                    } else {
-                        console.error('请求失败');
-                    }
-                }
-            };
-            xhr.send();
-        });*/
-    }
-
     function link(url) {
         const params = new URLSearchParams();
         params.append('user', sessionStorage.getItem('user'));
@@ -93,7 +84,12 @@
         sessionStorage.removeItem('user')
         sessionStorage.removeItem('token')
         sessionStorage.removeItem('union_id')
-        window.location.href = '/logout'
+        const params = new URLSearchParams();
+        params.append('user', sessionStorage.getItem('user'));
+        params.append('token', sessionStorage.getItem('token'));
+        const urlWithParams = '/logout' + `?${params.toString()}`;
+        console.log(urlWithParams)
+        window.location.href = urlWithParams
     }
 </script>
 </html>

@@ -1,15 +1,8 @@
-use std::f32::consts::E;
-use axum::handler::HandlerWithoutStateExt;
-use axum::http::{HeaderMap, Request, Response, StatusCode, Uri};
-use axum::response::{IntoResponse, Redirect};
-use axum::{Extension, Router};
-use axum::body::Body;
-use futures_util::future::BoxFuture;
-use tower::Service;
-use tower_http::auth::AsyncAuthorizeRequest;
+use axum::http::StatusCode;
+use axum::response::IntoResponse;
+use axum::Router;
 use tower_http::cors::CorsLayer;
 use crate::*;
-use crate::app::redis_util;
 
 mod sys_controller;
 mod org_controller;
@@ -19,17 +12,6 @@ mod auths;
 
 async fn handler_404() -> impl IntoResponse {
     (StatusCode::NOT_FOUND, "404")
-}
-
-async fn handler_to_login(headers: Extension<HeaderMap>) -> impl IntoResponse {
-    let header_token = headers.0.get("token").unwrap();
-    let header_user = headers.0.get("user").unwrap();
-    let token = header_token.to_str().unwrap_or("");
-    let user = header_user.to_str().unwrap_or("");
-    if redis_util::RedisUserInfo::redis_get_session(user).await.token_eq(token) {
-        return Redirect::to("/");
-    }
-    Redirect::to("/login")
 }
 
 pub async fn run() {
