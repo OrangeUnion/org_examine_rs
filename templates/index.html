@@ -5,7 +5,7 @@
         const to_login = document.getElementById("to_login")
         const newA = document.createElement("a")
         newA.className = "border bg-violet-500 border-violet-500 text-violet-50 text-base hover:bg-violet-600 hover:text-violet-50 active:bg-violet-700 bg-fixed rounded-lg px-5 py-1 drop-shadow-md duration-300"
-        if (sessionStorage.getItem("token").length < 1){
+        if (sessionStorage.getItem("token").length < 1) {
             newA.text = "登出"
             newA.onclick = function () {
                 logout()
@@ -41,7 +41,7 @@
             <span class="tracking-widest text-violet-600 text-4xl font-medium">考试系统</span>
         </div>
     </a>
-    <a href="#" onclick="paper()">
+    <a href="#" onclick="link_with_union_id('/paper')">
         <div class="flex justify-center items-center box-border rounded-3xl bg-gradient-to-r from-violet-100 to-purple-100 hover:shadow-xl shadow-lg shadow-zinc-50s duration-300 p-6 h-36">
             <span class="tracking-widest text-violet-600 text-4xl font-medium">考卷管理</span>
         </div>
@@ -49,6 +49,11 @@
     <a href="#" onclick="link('/list_union')">
         <div class="flex justify-center items-center box-border rounded-3xl bg-gradient-to-r from-purple-100 to-violet-100 hover:shadow-xl shadow-lg shadow-zinc-50s duration-300 p-6 h-36">
             <span class="tracking-widest text-violet-600 text-4xl font-medium">联盟列表</span>
+        </div>
+    </a>
+    <a href="#" onclick="link_with_union_id('/examine_results')">
+        <div class="flex justify-center items-center box-border rounded-3xl bg-gradient-to-r from-purple-100 to-violet-100 hover:shadow-xl shadow-lg shadow-zinc-50s duration-300 p-6 h-36">
+            <span class="tracking-widest text-violet-600 text-4xl font-medium">考试记录</span>
         </div>
     </a>
     <a href="#" onclick="logout()">
@@ -66,11 +71,13 @@
         return url + `?${params.toString()}`
 
     }
+
     function link(url) {
         const urlWithParams = auth_url(url)
         console.log(urlWithParams)
         window.location.href = urlWithParams
     }
+
     function logout() {
         sessionStorage.removeItem('user')
         sessionStorage.removeItem('token')
@@ -80,13 +87,13 @@
         window.location.href = urlWithParams
     }
 
-    function paper() {
+    function link_with_union_id(url) {
         const params = new URLSearchParams();
         params.append('user', sessionStorage.getItem('user'));
         params.append('token', sessionStorage.getItem('token'));
 
         const union_id = sessionStorage.getItem('union_id')
-        const url = '/paper/' + union_id
+        url = url + '/' + union_id
         const urlWithParams = url + `?${params.toString()}`;
         console.log(urlWithParams)
         window.location.href = urlWithParams

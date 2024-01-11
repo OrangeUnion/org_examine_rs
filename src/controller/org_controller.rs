@@ -46,11 +46,6 @@ pub async fn delete_examine(Path(id): Path<i64>) -> impl IntoResponse {
     (http::headers(), Json(data))
 }
 
-pub async fn check_examine(Json(answers): Json<Vec<i64>>) -> impl IntoResponse {
-    let data = org_examine::check_examine(answers, 1).await;
-    (http::headers(), Json(data))
-}
-
 pub async fn insert_paper(Json(paper): Json<UpdatePaper>) -> impl IntoResponse {
     log_info!("{:?}", paper);
     if paper.title.is_empty() {
@@ -82,7 +77,6 @@ pub async fn router(app_router: Router) -> Router {
         .route("/insert_examine", post(insert_examine))
         .route("/update_examine", post(update_examine))
         .route("/delete_examine/:id", get(delete_examine))
-        .route("/check_examine", post(check_examine))
         .route("/insert_paper", post(insert_paper))
         .route("/update_paper", post(update_paper))
         .route("/delete_paper/:id", get(delete_paper))

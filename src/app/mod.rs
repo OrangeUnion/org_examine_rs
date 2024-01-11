@@ -11,7 +11,7 @@ pub mod sys_role;
 pub mod org_examine;
 pub mod org_paper;
 pub mod org_union;
-pub mod org_examine_submit;
+pub mod org_examine_result;
 pub mod redis_util;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

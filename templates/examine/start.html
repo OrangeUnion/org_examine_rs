@@ -27,6 +27,13 @@
                     <input class="text-purple-900 outline-none rounded-full bg-white border-solid border-inherit hover:border-none active:border-solid shadow hover:shadow-md duration-300 w-full h-10 px-3"
                            id="user" name="user" type="text"/>
                 </label>
+                <label>
+                    <select id="union" class="">
+                        {% for union in unions %}
+                        <option value="{{union.id}}">{{union.name}}</option>
+                        {% endfor %}
+                    </select>
+                </label>
             </div>
 
         </div>
@@ -51,11 +58,13 @@
         return url + `?${params.toString()}`
 
     }
+
     function link(url) {
         const urlWithParams = auth_url(url)
         console.log(urlWithParams)
         window.location.href = urlWithParams
     }
+
     function logout() {
         sessionStorage.removeItem('user')
         sessionStorage.removeItem('token')
@@ -68,9 +77,10 @@
 <script>
     function start() {
         const userInput = document.getElementById('user');
+        const unionSelect = document.getElementById('union');
         if (userInput instanceof HTMLInputElement) {
             const user = userInput.value
-            let url = user.length > 0 ? '/examine_client/1/' + userInput.value : '/examine_start';
+            let url = user.length > 0 ? '/examine_client/' + unionSelect.value + '/' + userInput.value : '/examine_start';
             url = auth_url(url)
             console.log(url)
             window.location.href = url

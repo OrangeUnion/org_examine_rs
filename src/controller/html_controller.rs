@@ -3,10 +3,9 @@ use axum::response::Html;
 use axum::{Form, Router};
 use axum::extract::Path;
 use axum::routing::{get, post};
-use rand::Rng;
 use serde_json::Value;
 use tower_http::auth::AsyncRequireAuthorizationLayer;
-use crate::{http, log_info, log_link};
+use crate::{http, log_info, log_link, util};
 use crate::app::org_examine::check_examine;
 use crate::app::*;
 use crate::controller::auths::*;
@@ -28,18 +27,28 @@ pub async fn login() -> impl IntoResponse {
 pub async fn examine_start() -> impl IntoResponse {
     let template = http::ExamineStartTemplate {
         title: "开始考试".to_string(),
+        unions: org_union::select_all_union().await,
     }.to_string();
     Html(template)
 }
 
 pub async fn examine_client(Path((union_id, user)): Path<(i64, String)>) -> impl IntoResponse {
-    let union_papers = org_paper::select_papers_by_union(union_id).await;
-    let random_paper = rand::thread_rng().gen_range(1..=union_papers.len()) as i64;
+    let paper_id = util::permission::random_paper_id_by_union(union_id).await;
+    let examines = org_examine::select_examines_by_paper(paper_id).await;
     let template = http::ExamineClientTemplate {
         title: "考试题目".to_string(),
-        examines: org_examine::select_update_examines_by_paper(random_paper).await,
-        paper_id: random_paper,
+        examines,
+        paper_id,
+        union_id,
         user,
+    }.to_string();
+    Html(template)
+}
+
+pub async fn examine_result(Path(union_id): Path<i64>) -> impl IntoResponse {
+    let template = http::ExamineResultTemplate {
+        title: "考试记录".to_string(),
+        examine_results: org_examine_result::select_examine_results_by_union_id(union_id).await,
     }.to_string();
     Html(template)
 }
@@ -72,6 +81,9 @@ pub async fn examine_update(Path(id): Path<i64>) -> impl IntoResponse {
 
 pub async fn examine_check(Form(res): Form<Value>) -> impl IntoResponse {
     log_link!("{res}");
+    let user = res["user"].as_str().unwrap_or("").to_string();
+    let union_id = res["union_id"].as_str().unwrap_or("0").parse().unwrap_or(0);
+    let paper_id = res["paper_id"].as_str().unwrap_or("0").parse().unwrap_or(0);
     let ticket_size = res["ticket_size"].as_str().unwrap_or("0").parse::<usize>().unwrap_or(0);
     let mut vec_answer = vec![];
     for re in 1..ticket_size + 1 {
@@ -80,7 +92,7 @@ pub async fn examine_check(Form(res): Form<Value>) -> impl IntoResponse {
         vec_answer.push(answer)
     }
     log_info!("{vec_answer:?}");
-    let check = check_examine(vec_answer, 1).await;
+    let check = check_examine(user, union_id, vec_answer, paper_id).await;
     let result = match check {
         true => "考试通过".to_string(),
         false => "考试不合格".to_string()
@@ -123,6 +135,7 @@ pub async fn router(app_router: Router) -> Router {
     app_router
         .route("/list_paper_examines", post(list_paper_examines))
         .route("/examine_update/:id", get(examine_update))
+        .route("/examine_results/:union_id", get(examine_result))
         .route("/paper/:union_id", get(papers))
         .route("/list_union", get(list_union))
         .route("/public_setting", get(public_setting))

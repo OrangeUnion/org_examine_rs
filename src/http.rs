@@ -1,7 +1,8 @@
 use askama::Template;
 use axum::http::{header, HeaderName};
 use axum::response::AppendHeaders;
-use crate::app::org_examine::{Examine, Examines, UpdateExamines};
+use crate::app::org_examine::{Examine, Examines};
+use crate::app::org_examine_result::ExamineResults;
 use crate::app::org_paper::Papers;
 use crate::app::org_union::Unions;
 
@@ -21,14 +22,16 @@ pub struct LoginTemplate {
 #[template(path = "examine/start.html")]
 pub struct ExamineStartTemplate {
     pub title: String,
+    pub unions: Unions,
 }
 
 #[derive(Template)]
 #[template(path = "examine/client.html")]
 pub struct ExamineClientTemplate {
     pub title: String,
-    pub examines: UpdateExamines,
+    pub examines: Examines,
     pub paper_id: i64,
+    pub union_id: i64,
     pub user: String,
 }
 
@@ -46,6 +49,13 @@ pub struct ExamineUpdateTemplate {
     pub title: String,
     pub examine: Examine,
     pub correct_answer: usize,
+}
+
+#[derive(Template)]
+#[template(path = "examine/result.html")]
+pub struct ExamineResultTemplate {
+    pub title: String,
+    pub examine_results: ExamineResults,
 }
 
 #[derive(Template)]

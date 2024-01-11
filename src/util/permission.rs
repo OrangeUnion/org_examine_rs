@@ -1,7 +1,9 @@
 use crypto::digest::Digest;
 use crypto::sha2::Sha256;
+use rand::prelude::SliceRandom;
 use serde_json::{json, Value};
 use crate::app;
+use crate::app::org_paper;
 
 pub fn encode_password(password: &str) -> String {
     let hash = bcrypt::hash(password, bcrypt::DEFAULT_COST);
@@ -64,4 +66,15 @@ pub async fn show_user(username: &str) -> Value {
         "user_roles": user_roles
     });
     value
+}
+
+pub async fn random_paper_id_by_union(union_id: i64)->i64{
+    let union_papers = org_paper::select_papers_by_union(union_id).await;
+    // 查询出paper的id并打包为组
+    let mut papers_id = vec![];
+    for union_paper in union_papers {
+        papers_id.push(union_paper.id)
+    }
+    // 根据paper总数生成随机数
+    *papers_id.choose(&mut rand::thread_rng()).unwrap_or(&0)
 }

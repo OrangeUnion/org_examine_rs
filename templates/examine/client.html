@@ -21,14 +21,16 @@
     <div class="flex grid box-border rounded-3xl bg-purple-50 hover:shadow-xl shadow-lg shadow-purple-50s duration-300 p-6">
         <span class="m-5 tracking-widest text-purple-800 text-3xl text-center font-medium">考试系统</span>
         <form method="post" action="/examine_check">
+            <input type="hidden" name="user" value="{{user}}">
             <input type="hidden" name="ticket_size" value="{{examines.len()}}">
             <input type="hidden" name="paper_id" value="{{paper_id}}">
+            <input type="hidden" name="union_id" value="{{union_id}}">
             <p class="m-5 text-purple-800 text-base text-center font-medium">作答人：{{user}}</p>
             {% for examine in examines %}
             <div class="m-5 text-base text-purple-900">
                 <span class="mb-2">{{examine.problem}}</span>
                 <div class="mb-2 grid grid-cols-1">
-                    {% for answer in examine.answers %}
+                    {% for answer in examine.answers.0 %}
                     <label class="p-3">
                         <input class="ring-2 ring-purple-300 ring-offset-2 w-3 h-3 hover:bg-purple-400 checked:bg-purple-500 checked:border-purple-300 focus:outline-none rounded-full duration-300 appearance-none"
                                name="examine_{{examine.id}}" value="{{loop.index}}" type="radio" {% if loop.index == 1 %} checked {% endif %}/>
