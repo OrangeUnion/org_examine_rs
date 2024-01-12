@@ -60,6 +60,19 @@ pub async fn select_papers_by_union(union_id: i64) -> Papers {
     Papers::from(res)
 }
 
+pub async fn select_papers_by_union_status(union_id: i64, status: i64) -> Papers {
+    let conn = get_pool().await.expect("Link Pool Error");
+    let sql = "select * from org_paper where union_id = ? and status = ?";
+    let response = sqlx::query_as::<_, Paper>(sql)
+        .bind(union_id).bind(status)
+        .fetch_all(&conn).await;
+    let res = match response {
+        Ok(r) => { r }
+        Err(_) => { vec![Paper::default()] }
+    };
+    Papers::from(res)
+}
+
 pub async fn select_paper_by_id(id: i64) -> Paper {
     let conn = get_pool().await.expect("Link Pool Error");
     let sql = "select * from org_paper where id = ?";

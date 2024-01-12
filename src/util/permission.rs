@@ -68,8 +68,8 @@ pub async fn show_user(username: &str) -> Value {
     value
 }
 
-pub async fn random_paper_id_by_union(union_id: i64)->i64{
-    let union_papers = org_paper::select_papers_by_union(union_id).await;
+pub async fn random_paper_id_by_union(union_id: i64) -> i64 {
+    let union_papers = org_paper::select_papers_by_union_status(union_id, 1).await;
     // 查询出paper的id并打包为组
     let mut papers_id = vec![];
     for union_paper in union_papers {
