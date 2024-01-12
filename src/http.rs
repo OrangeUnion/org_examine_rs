@@ -1,3 +1,4 @@
+use crate::app::org_examine_result::CheckResult;
 use askama::Template;
 use axum::http::{header, HeaderName};
 use axum::response::AppendHeaders;

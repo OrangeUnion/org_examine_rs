@@ -46,10 +46,13 @@
             <span class="tracking-widest text-violet-600 text-xl font-medium">{{paper.title}}</span>
         </button>
         <p class="my-1 text-violet-900 text-base">创建时间：{{paper.create_time}}</p>
+        <button id="paper_status" onclick="update_status({{paper.id}}, {{paper.status}})" class="my-1 tracking-widest font-bold
+                    {% if paper.status == 1 %}bg-green-500 hover:bg-green-400 active:bg-green-600{% else %}bg-rose-500 hover:bg-rose-400 active:bg-rose-600{% endif %}
+                    bg-fixed rounded-full text-slate-50 px-4 py-1 drop-shadow-md duration-300">{% if paper.status == 1
+            %}启用中{% else %}停用中{% endif %}
+        </button>
         <button id="delete_paper" onclick="delete_paper('{{paper.id}}')" class="my-1 tracking-widest font-bold
-                    bg-red-500
-                    hover:bg-red-400
-                    active:bg-red-600
+                    bg-red-500 hover:bg-red-400 active:bg-red-600
                     bg-fixed rounded-full text-slate-50 px-4 py-1 drop-shadow-md duration-300">删除
         </button>
     </div>
@@ -64,11 +67,13 @@
         return url + `?${params.toString()}`
 
     }
+
     function link(url) {
         const urlWithParams = auth_url(url)
         console.log(urlWithParams)
         window.location.href = urlWithParams
     }
+
     function logout() {
         sessionStorage.removeItem('user')
         sessionStorage.removeItem('token')
@@ -79,6 +84,27 @@
     }
 </script>
 <script>
+    function update_status(id, status) {
+        const jsonData = JSON.stringify({
+            id: id,
+            status: status
+        })
+        console.log(jsonData)
+        fetch(auth_url('/update_paper_status'), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: jsonData
+        }).then(response => {
+            console.log('服务器返回的响应:', response)
+            window.location.reload()
+        }).catch(error => {
+            console.error('发送请求时出错:', error)
+        })
+
+    }
+
     function delete_paper(id) {
         const confirmed = confirm("确定删除？");
 

@@ -26,6 +26,11 @@ pub struct Config {
     redis_expire: i64,
 }
 
+#[derive(Clone, Copy, Serialize, Deserialize, sqlx::FromRow)]
+pub struct TableCount {
+    count: i64,
+}
+
 pub async fn get_pool() -> Result<Pool<MySql>, Error> {
     let config = get_config().await;
     let url_option = MySqlConnectOptions::from_str(&config.database_url)

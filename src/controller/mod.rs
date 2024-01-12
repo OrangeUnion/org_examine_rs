@@ -1,8 +1,10 @@
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::Router;
+use tower_http::auth::AsyncRequireAuthorizationLayer;
 use tower_http::cors::CorsLayer;
 use crate::*;
+use crate::controller::auths::TokenAuth;
 
 mod sys_controller;
 mod org_controller;
@@ -21,6 +23,11 @@ pub async fn run() {
 
     let mut app = Router::new()
         .fallback(handler_404);
+
+    app = html_controller::auth_router(app).await;
+    app = sys_controller::auth_router(app).await;
+    app = org_controller::auth_router(app).await;
+    app = app.layer(AsyncRequireAuthorizationLayer::new(TokenAuth));
 
     app = html_controller::router(app).await;
     app = sys_controller::router(app).await;

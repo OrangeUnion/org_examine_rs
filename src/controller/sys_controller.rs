@@ -49,10 +49,14 @@ pub async fn logout() -> impl IntoResponse {
 pub async fn router(app_router: Router) -> Router {
     app_router
         .route("/users", get(select_users))
-        .route("/user/:username", get(select_user))
-        .route("/group/:username", get(select_user_groups))
         .route("/login_check", post(login_check))
-        .route("/list_user/:username", get(list_user))
         .route("/show_user/:username", get(show_user))
         .route("/logout", get(logout))
+}
+
+pub async fn auth_router(app_router: Router) -> Router {
+    app_router
+        .route("/user/:username", get(select_user))
+        .route("/group/:username", get(select_user_groups))
+        .route("/list_user/:username", get(list_user))
 }

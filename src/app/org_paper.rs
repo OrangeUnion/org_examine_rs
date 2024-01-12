@@ -72,6 +72,26 @@ pub async fn select_paper_by_id(id: i64) -> Paper {
     }
 }
 
+pub async fn update_paper_status(id: i64, mut status: i64) -> u64 {
+    // 判断当前status状态，决定修改的状态
+    status = match status {
+        1 => 0,
+        _ => 1
+    };
+    let conn = get_pool().await.expect("Link Pool Error");
+    let sql = "update org_paper set status = ? where id = ?";
+    let response = sqlx::query(sql)
+        .bind(status).bind(id)
+        .execute(&conn).await;
+    match response {
+        Ok(r) => { r.rows_affected() }
+        Err(e) => {
+            log_error!("SQL Error {e}");
+            0
+        }
+    }
+}
+
 pub async fn insert_paper(title: &str, union_id: i64) -> u64 {
     let conn = get_pool().await.expect("Link Pool Error");
     let datetime = util::datetime::now_beijing_time();

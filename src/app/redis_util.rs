@@ -53,3 +53,10 @@ pub async fn redis_save_session(redis_user_info: RedisUserInfo) -> RedisResult<b
     con.expire(format!("org_user_{}", redis_user_info.username), get_config().await.redis_expire)?;
     Ok(true)
 }
+
+pub async fn redis_start_examine(user: &str, union_id: i64, timeout: i64) -> RedisResult<()> {
+    let mut con = get_redis_conn().await.expect("Redis链接失败");
+    con.set(format!("start_examine_{union_id}_{user}"), timeout)?;
+    con.expire(format!("start_examine_{union_id}_{user}"), timeout)?;
+    Ok(())
+}

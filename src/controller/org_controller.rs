@@ -46,6 +46,14 @@ pub async fn delete_examine(Path(id): Path<i64>) -> impl IntoResponse {
     (http::headers(), Json(data))
 }
 
+pub async fn update_paper_status(Json(body): Json<Value>) -> impl IntoResponse {
+    log_info!("{:?}", body);
+    let id = body["id"].as_i64().unwrap_or(0);
+    let status = body["status"].as_i64().unwrap_or(0);
+    let data = org_paper::update_paper_status(id, status).await;
+    (http::headers(), Json(data))
+}
+
 pub async fn insert_paper(Json(paper): Json<UpdatePaper>) -> impl IntoResponse {
     log_info!("{:?}", paper);
     if paper.title.is_empty() {
@@ -73,11 +81,16 @@ pub async fn delete_paper(Path(id): Path<i64>) -> impl IntoResponse {
 
 pub async fn router(app_router: Router) -> Router {
     app_router
-        .route("/list_examine", get(list_examine))
         .route("/insert_examine", post(insert_examine))
         .route("/update_examine", post(update_examine))
         .route("/delete_examine/:id", get(delete_examine))
+        .route("/update_paper_status", post(update_paper_status))
         .route("/insert_paper", post(insert_paper))
         .route("/update_paper", post(update_paper))
         .route("/delete_paper/:id", get(delete_paper))
+}
+
+pub async fn auth_router(app_router: Router) -> Router {
+    app_router
+        .route("/list_examine", get(list_examine))
 }

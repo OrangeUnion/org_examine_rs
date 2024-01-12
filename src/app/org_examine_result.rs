@@ -1,8 +1,18 @@
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use sqlx::types::Json;
-use crate::app::get_pool;
-use crate::{log_error, log_info, util};
+use crate::app::{get_pool, TableCount};
+use crate::{log_error, util};
+
+#[derive(Clone, Debug, Serialize, Deserialize, sqlx::Type, Copy)]
+#[repr(i8)]
+pub enum CheckResult {
+    Pass,
+    UnPass,
+    Overrun,
+    TimeOut,
+    None,
+}
 
 pub type ExamineResults = Vec<ExamineResult>;
 
@@ -13,12 +23,12 @@ pub struct ExamineResult {
     pub union_id: i64,
     pub paper_id: i64,
     pub answers: Json<Vec<i64>>,
-    pub result: bool,
+    pub result: CheckResult,
     pub create_time: NaiveDateTime,
 }
 
 impl ExamineResult {
-    pub fn update_to(user: String, union_id: i64, paper_id: i64, answers: Vec<i64>, result: bool) -> Self {
+    pub fn update_to(user: String, union_id: i64, paper_id: i64, answers: Vec<i64>, result: CheckResult) -> Self {
         Self {
             id: 0,
             user,
@@ -31,6 +41,12 @@ impl ExamineResult {
     }
 }
 
+impl Default for CheckResult {
+    fn default() -> Self {
+        Self::None
+    }
+}
+
 impl Default for ExamineResult {
     fn default() -> Self {
         Self {
@@ -39,7 +55,7 @@ impl Default for ExamineResult {
             union_id: 0,
             paper_id: 0,
             answers: Default::default(),
-            result: false,
+            result: Default::default(),
             create_time: Default::default(),
         }
     }
@@ -54,11 +70,36 @@ pub async fn select_examine_results() -> ExamineResults {
         Ok(r) => { r }
         Err(_) => { ExamineResults::default() }
     };
-    for re in res.clone() {
-        let ans = re.answers.0;
-        log_info!("{:?}",ans)
-    }
     ExamineResults::from(res)
+}
+
+pub async fn select_examine_results_by_user(user: &str) -> ExamineResults {
+    let conn = get_pool().await.expect("Link Pool Error");
+    let sql = "select * from org_examine_result where user = ?";
+    let response = sqlx::query_as::<_, ExamineResult>(sql)
+        .bind(user)
+        .fetch_all(&conn).await;
+    let res = match response {
+        Ok(r) => { r }
+        Err(_) => { ExamineResults::default() }
+    };
+    ExamineResults::from(res)
+}
+
+pub async fn count_examine_results_by_user(user: &str) -> i64 {
+    let conn = get_pool().await.expect("Link Pool Error");
+    let sql = "select count(id) as count from org_examine_result where user = ?";
+    let response = sqlx::query_as::<_, TableCount>(sql)
+        .bind(user)
+        .fetch_one(&conn).await;
+    let res = match response {
+        Ok(r) => { r.count }
+        Err(e) => {
+            log_error!("{e}");
+            -1
+        }
+    };
+    res
 }
 
 pub async fn select_examine_results_by_union_id(union_id: i64) -> ExamineResults {
@@ -71,10 +112,6 @@ pub async fn select_examine_results_by_union_id(union_id: i64) -> ExamineResults
         Ok(r) => { r }
         Err(_) => { ExamineResults::default() }
     };
-    for re in res.clone() {
-        let ans = re.answers.0;
-        log_info!("{:?}",ans)
-    }
     ExamineResults::from(res)
 }
 

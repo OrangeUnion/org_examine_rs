@@ -8,6 +8,7 @@ use tower_http::auth::AsyncRequireAuthorizationLayer;
 use crate::{http, log_info, log_link, util};
 use crate::app::org_examine::check_examine;
 use crate::app::*;
+use crate::app::org_examine_result::CheckResult;
 use crate::controller::auths::*;
 
 pub async fn index() -> impl IntoResponse {
@@ -40,8 +41,9 @@ pub async fn examine_client(Path((union_id, user)): Path<(i64, String)>) -> impl
         examines,
         paper_id,
         union_id,
-        user,
+        user: user.clone(),
     }.to_string();
+    redis_util::redis_start_examine(&user, union_id, 3600).await.expect("Start Failed");
     Html(template)
 }
 
@@ -98,9 +100,12 @@ pub async fn examine_check(Form(res): Form<Value>) -> impl IntoResponse {
     log_info!("{vec_answer:?}");
     let check = check_examine(user, union_id, vec_answer, paper_id).await;
     let result = match check {
-        true => "考试通过".to_string(),
-        false => "考试不合格".to_string()
-    };
+        CheckResult::Pass => "考试合格",
+        CheckResult::UnPass => "考试不合格",
+        CheckResult::Overrun => "次数用尽",
+        CheckResult::TimeOut => "考试超时",
+        CheckResult::None => "啥都不是",
+    }.to_string();
     let template = http::ExamineCheckTemplate {
         title: "考试结果".to_string(),
         result,
@@ -137,16 +142,20 @@ pub async fn list_union() -> impl IntoResponse {
 
 pub async fn router(app_router: Router) -> Router {
     app_router
-        .route("/list_paper_examines", post(list_paper_examines))
-        .route("/examine_update/:id", get(examine_update))
-        .route("/examine_results/:union_id", get(examine_result))
-        .route("/paper/:union_id", get(papers))
-        .route("/list_union", get(list_union))
-        .route("/public_setting", get(public_setting))
         .layer(AsyncRequireAuthorizationLayer::new(TokenAuth))
         .route("/", get(index))
         .route("/login", get(login).layer(AsyncRequireAuthorizationLayer::new(LoginAuth)))
         .route("/examine_start", get(examine_start))
         .route("/examine_client/:union_id/:user", get(examine_client))
         .route("/examine_check", post(examine_check))
+}
+
+pub async fn auth_router(app_router: Router) -> Router {
+    app_router
+        .route("/list_paper_examines", post(list_paper_examines))
+        .route("/examine_update/:id", get(examine_update))
+        .route("/examine_results/:union_id", get(examine_result))
+        .route("/paper/:union_id", get(papers))
+        .route("/list_union", get(list_union))
+        .route("/public_setting", get(public_setting))
 }

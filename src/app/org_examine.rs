@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::types::Json;
 use crate::app::{get_pool, org_examine_result};
 use crate::{log_error, log_info, util};
+use crate::app::org_examine_result::CheckResult;
 
 pub type Examines = Vec<Examine>;
 
@@ -154,23 +155,28 @@ pub async fn delete_examine(id: i64) -> u64 {
     }
 }
 
-pub async fn check_examine(user: String, union_id: i64, post_answers: Vec<i64>, paper_id: i64) -> bool {
-    let conn = get_pool().await.expect("Link Pool Error");
-    let sql = "select * from org_examine where paper_id = ?";
-    let response = sqlx::query_as::<_, Examine>(sql).bind(paper_id).fetch_all(&conn).await;
-    let res = match response {
-        Ok(r) => { r }
-        Err(e) => {
-            log_error!("SQL Error {e}");
-            vec![Examine::default()]
-        }
-    };
+pub async fn check_examine(user: String, union_id: i64, post_answers: Vec<i64>, paper_id: i64) -> CheckResult {
+    // 查询用户提交次数
+    let user_examine_count = org_examine_result::count_examine_results_by_user(&user).await;
+    log_info!("COUNT {}考试次数{user_examine_count}",&user);
+    // 查询考卷下的题目
+    let res = select_examines_by_paper(paper_id).await;
+    // 打包正确答案
     let mut correct_answers = Vec::new();
     for re in res {
         correct_answers.push(re.correct_answer)
     }
-    log_info!("post: {post_answers:?} data: {correct_answers:?}");
-    let result = post_answers.eq(&correct_answers);
+    log_info!("提交答案: {post_answers:?} 正确答案: {correct_answers:?}");
+
+    if user_examine_count > 10 {
+        return CheckResult::Overrun;
+    };
+    let result = match post_answers.eq(&correct_answers) {
+        true => CheckResult::Pass,
+        false => CheckResult::UnPass,
+    };
+
+    // 写入数据库
     let examine_result = org_examine_result::ExamineResult::update_to(user, union_id, paper_id, post_answers, result);
     let to_result = org_examine_result::insert_examine_results(examine_result).await;
     log_info!("RESULT写入 {to_result}");

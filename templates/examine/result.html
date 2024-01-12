@@ -33,7 +33,20 @@
                 <p>[{{loop.index}}] {{answer}}</p>
                 {% endfor %}
             </div>
-            <p class="tracking-widest text-violet-600 text-lg font-medium mb-2">{% if result.result %}合格{% else %}不合格{% endif %}</p>
+            <p class="tracking-widest text-violet-600 text-lg font-medium mb-2">
+                {% match result.result %}
+                    {% when CheckResult::Pass %}
+                        合格
+                    {% when CheckResult::UnPass %}
+                        不合格
+                    {% when CheckResult::Overrun %}
+                        次数上限
+                    {% when CheckResult::TimeOut %}
+                        超时
+                    {% when CheckResult::None %}
+                        啥都不是
+                {% endmatch %}
+            </p>
         </a>
         <div class="text-violet-900 text-base mb-2">
             <p>创建时间：{{result.create_time}}</p>
