@@ -31,7 +31,15 @@
             {% for examine in examines %}
             <div class="m-5 text-base text-purple-900">
                 <input type="hidden" name="examine_ids" value="{{examine.id}}">
-                <span class="mb-2">{% if examine.problem_type == 1 %}[单选]{% else if examine.problem_type == 2 %}[多选]{% endif %}{{examine.problem}}</span>
+                <span class="mb-2">
+                    {% if examine.problem_type == 1 %}
+                    [单选]
+                    {% else if examine.problem_type == 2 %}
+                    [多选]
+                    {% else if examine.problem_type == 3 %}
+                    [填空]
+                    {% endif %}
+                    {{examine.problem}}</span>
                 <div class="mb-2 grid grid-cols-1">
                     {% for answer in examine.answers.0 %}
                     {% if examine.problem_type == 1 %}
@@ -45,6 +53,13 @@
                         <input class="ring-2 ring-purple-300 ring-offset-2 w-3 h-3 hover:bg-purple-400 checked:bg-purple-500 checked:border-purple-300 focus:outline-none rounded duration-300 appearance-none"
                                name="examine_{{examine.id}}" value="{{loop.index}}" type="checkbox"/>
                         <span class="p-2 text-pretty">{{answer}}</span>
+                    </label>
+                    {% else if examine.problem_type == 3 %}
+                    <label class="p-3">
+                        <textarea name="examine_{{examine.id}}" rows="4"
+                                  class="my-1 text-purple-900 outline-none rounded bg-white border-solid border-inherit
+                                  hover:border-none active:border-solid
+                                  shadow hover:shadow-md duration-300 min-h-20 p-3 w-full"></textarea>
                     </label>
                     {% endif %}
                     {% endfor %}
@@ -72,6 +87,9 @@
             const answer_array = []
             document.getElementsByName("examine_" + value.value).forEach(value => {
                 if (value.checked) {
+                    answer_array.push(value.value)
+                }
+                if (value instanceof HTMLTextAreaElement) {
                     answer_array.push(value.value)
                 }
             })

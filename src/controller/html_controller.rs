@@ -5,10 +5,8 @@ use axum::extract::Path;
 use axum::routing::{get, post};
 use serde_json::Value;
 use tower_http::auth::AsyncRequireAuthorizationLayer;
-use crate::{http, log_info, log_link, util};
-use crate::app::org_examine::{check_examine, ExamineValues};
+use crate::{http, log_link, util};
 use crate::app::*;
-use crate::app::org_examine_result::CheckResult;
 use crate::controller::auths::*;
 
 pub async fn index() -> impl IntoResponse {
@@ -85,6 +83,11 @@ pub async fn examine_update(Path((id, problem_type)): Path<(i64, i64)>) -> impl 
         }.to_string(),
         2 => http::ExamineUpdate2Template {
             title: "多选题配置".to_string(),
+            examine: examine.clone(),
+            correct_answer: examine.correct_answer.0,
+        }.to_string(),
+        3 => http::ExamineUpdate3Template {
+            title: "填空题配置".to_string(),
             examine: examine.clone(),
             correct_answer: examine.correct_answer.0,
         }.to_string(),

@@ -1,14 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // 在页面加载前触发的逻辑
-            if (sessionStorage.getItem('token') === null) {
-                return window.location.href = '/login'
-            }
-        })
-    </script>
     <meta charset="UTF-8">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,7 +25,7 @@
                 <textarea name="problem" rows="4"
                           class="my-2 text-purple-900 outline-none rounded bg-white border-solid border-inherit
                        hover:border-none active:border-solid
-                       shadow hover:shadow-md duration-300 min-h-20 px-3 w-full">{{examine.problem}}</textarea>
+                       shadow hover:shadow-md duration-300 min-h-20 p-3 w-full">{{examine.problem}}</textarea>
             </label>
             <div id="list_answers" class="grid grid-cols-1 flex space-y-5">
                 {% for answer in examine.answers.0 %}
