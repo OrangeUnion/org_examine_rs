@@ -2,10 +2,11 @@ use axum::{Json, Router};
 use axum::extract::Path;
 use axum::response::IntoResponse;
 use axum::routing::{get, post};
-use serde_json::Value;
+use serde_json::{json, Value};
 use crate::{http, log_info};
 use crate::app::{org_examine, org_paper};
 use crate::app::org_examine::{InsertExamine, UpdateExamine};
+use crate::app::org_examine_result::{CheckResult, UpdateCheck};
 use crate::app::org_paper::UpdatePaper;
 
 pub async fn list_examine() -> impl IntoResponse {
@@ -18,25 +19,13 @@ pub async fn insert_examine(Json(examine): Json<InsertExamine>) -> impl IntoResp
     if examine.problem.is_empty() {
         return (http::headers(), Json(0));
     }
-    let data = org_examine::insert_examine(examine.problem, examine.paper_id).await;
+    let data = org_examine::insert_examine(examine).await;
     (http::headers(), Json(data))
 }
 
-pub async fn update_examine(Json(res): Json<Value>) -> impl IntoResponse {
-    log_info!("{res}");
-    let mut vec_answers = vec![];
-    for answer in res["answers"].as_array().unwrap() {
-        vec_answers.push(answer.as_str().unwrap_or("").to_string())
-    };
-    let update = UpdateExamine {
-        id: res["id"].as_str().unwrap_or("0").parse::<i64>().unwrap_or(0),
-        problem: res["problem"].as_str().unwrap_or("").to_string(),
-        answers: vec_answers,
-        correct_answer: res["correct_answer"].as_str().unwrap_or("0").parse::<i64>().unwrap_or(0),
-        problem_type: 1,
-        paper_id: res["paper_id"].as_str().unwrap_or("0").parse::<i64>().unwrap_or(0),
-    };
-    let data = org_examine::update_examine(update).await;
+pub async fn update_examine(Json(res): Json<UpdateExamine>) -> impl IntoResponse {
+    log_info!("{res:?}");
+    let data = org_examine::update_examine(res).await;
     (http::headers(), Json(data))
 }
 
@@ -44,6 +33,22 @@ pub async fn delete_examine(Path(id): Path<i64>) -> impl IntoResponse {
     log_info!("删除考题[{}]", id);
     let data = org_examine::delete_examine(id).await;
     (http::headers(), Json(data))
+}
+
+pub async fn check_examine(Json(res): Json<UpdateCheck>) -> impl IntoResponse {
+    log_info!("{res:?}");
+    let data = org_examine::check_examine(res).await;
+    let result = match data {
+        CheckResult::Pass => "考试合格",
+        CheckResult::UnPass => "考试不合格",
+        CheckResult::Overrun => "次数用尽",
+        CheckResult::TimeOut => "考试超时",
+        CheckResult::None => "啥都不是",
+    }.to_string();
+    let json = json!({
+        "result": result
+    });
+    (http::headers(), Json(json))
 }
 
 pub async fn update_paper_status(Json(body): Json<Value>) -> impl IntoResponse {
@@ -84,6 +89,7 @@ pub async fn router(app_router: Router) -> Router {
         .route("/insert_examine", post(insert_examine))
         .route("/update_examine", post(update_examine))
         .route("/delete_examine/:id", get(delete_examine))
+        .route("/examine_check", post(check_examine))
         .route("/update_paper_status", post(update_paper_status))
         .route("/insert_paper", post(insert_paper))
         .route("/update_paper", post(update_paper))

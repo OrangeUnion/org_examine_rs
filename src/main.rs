@@ -6,5 +6,6 @@ mod controller;
 
 #[tokio::main]
 async fn main() {
+    vec!["".to_string()];
     controller::run().await
 }

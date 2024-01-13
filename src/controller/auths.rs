@@ -2,7 +2,7 @@ use axum::body::Body;
 use axum::http::{Request, Response, StatusCode};
 use futures_util::future::BoxFuture;
 use tower_http::auth::AsyncAuthorizeRequest;
-use crate::{log_error, log_info, log_link, log_warn, util};
+use crate::{log_error, log_info, log_warn, util};
 use crate::app::redis_util;
 
 #[derive(Clone, Copy)]
@@ -17,7 +17,6 @@ impl<B: Send + 'static> AsyncAuthorizeRequest<B> for TokenAuth {
     type Future = BoxFuture<'static, Result<Request<B>, Response<Self::ResponseBody>>>;
 
     fn authorize(&mut self, request: Request<B>) -> Self::Future {
-        log_link!("{:?}", request.uri().query());
         Box::pin(async {
             let unauthorized_response = Response::builder()
                 .status(StatusCode::FOUND)
@@ -27,10 +26,8 @@ impl<B: Send + 'static> AsyncAuthorizeRequest<B> for TokenAuth {
 
             if let Some(uri_query) = request.uri().query() {
                 let url = util::parse_query_string(uri_query);
-                log_link!("{:?}", url);
                 let user = url.get("user").unwrap_or(&"".to_string()).to_string();
                 let token = url.get("token").unwrap_or(&"".to_string()).to_string();
-                log_link!("{} {}", user, token);
 
                 if !redis_util::RedisUserInfo::redis_get_session(&user).await.token_eq(&token) {
                     log_error!("not login");
@@ -53,7 +50,6 @@ impl<B: Send + 'static> AsyncAuthorizeRequest<B> for LoginAuth {
     type Future = BoxFuture<'static, Result<Request<B>, Response<Self::ResponseBody>>>;
 
     fn authorize(&mut self, request: Request<B>) -> Self::Future {
-        log_link!("{:?}", request.uri().query());
         Box::pin(async {
             let home_response = Response::builder()
                 .status(StatusCode::FOUND)
@@ -63,10 +59,8 @@ impl<B: Send + 'static> AsyncAuthorizeRequest<B> for LoginAuth {
 
             if let Some(uri_query) = request.uri().query() {
                 let url = util::parse_query_string(uri_query);
-                log_link!("{:?}", url);
                 let user = url.get("user").unwrap_or(&"".to_string()).to_string();
                 let token = url.get("token").unwrap_or(&"".to_string()).to_string();
-                log_link!("{} {}", user, token);
 
                 if redis_util::RedisUserInfo::redis_get_session(&user).await.token_eq(&token) {
                     log_warn!("is login");

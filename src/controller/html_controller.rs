@@ -6,7 +6,7 @@ use axum::routing::{get, post};
 use serde_json::Value;
 use tower_http::auth::AsyncRequireAuthorizationLayer;
 use crate::{http, log_info, log_link, util};
-use crate::app::org_examine::check_examine;
+use crate::app::org_examine::{check_examine, ExamineValues};
 use crate::app::*;
 use crate::app::org_examine_result::CheckResult;
 use crate::controller::auths::*;
@@ -75,41 +75,21 @@ pub async fn list_paper_examines(Form(res): Form<Value>) -> impl IntoResponse {
     Html(template)
 }
 
-pub async fn examine_update(Path(id): Path<i64>) -> impl IntoResponse {
+pub async fn examine_update(Path((id, problem_type)): Path<(i64, i64)>) -> impl IntoResponse {
     let examine = org_examine::select_examine(id).await;
-    let template = http::ExamineUpdateTemplate {
-        title: "考题配置".to_string(),
-        examine: examine.clone(),
-        correct_answer: examine.correct_answer as usize,
-    }.to_string();
-    Html(template)
-}
-
-pub async fn examine_check(Form(res): Form<Value>) -> impl IntoResponse {
-    log_link!("{res}");
-    let user = res["user"].as_str().unwrap_or("").to_string();
-    let union_id = res["union_id"].as_str().unwrap_or("0").parse().unwrap_or(0);
-    let paper_id = res["paper_id"].as_str().unwrap_or("0").parse().unwrap_or(0);
-    let ticket_size = res["ticket_size"].as_str().unwrap_or("0").parse::<usize>().unwrap_or(0);
-    let mut vec_answer = vec![];
-    for re in 1..ticket_size + 1 {
-        let answer = res[format!("examine_{}", re)].as_str().unwrap_or("0").parse::<i64>().unwrap_or(0);
-        log_info!("{answer}");
-        vec_answer.push(answer)
-    }
-    log_info!("{vec_answer:?}");
-    let check = check_examine(user, union_id, vec_answer, paper_id).await;
-    let result = match check {
-        CheckResult::Pass => "考试合格",
-        CheckResult::UnPass => "考试不合格",
-        CheckResult::Overrun => "次数用尽",
-        CheckResult::TimeOut => "考试超时",
-        CheckResult::None => "啥都不是",
-    }.to_string();
-    let template = http::ExamineCheckTemplate {
-        title: "考试结果".to_string(),
-        result,
-    }.to_string();
+    let template = match problem_type {
+        1 => http::ExamineUpdateTemplate {
+            title: "单选题配置".to_string(),
+            examine: examine.clone(),
+            correct_answer: examine.correct_answer.0,
+        }.to_string(),
+        2 => http::ExamineUpdate2Template {
+            title: "多选题配置".to_string(),
+            examine: examine.clone(),
+            correct_answer: examine.correct_answer.0,
+        }.to_string(),
+        _ => "404".to_string()
+    };
     Html(template)
 }
 
@@ -147,13 +127,12 @@ pub async fn router(app_router: Router) -> Router {
         .route("/login", get(login).layer(AsyncRequireAuthorizationLayer::new(LoginAuth)))
         .route("/examine_start", get(examine_start))
         .route("/examine_client/:union_id/:user", get(examine_client))
-        .route("/examine_check", post(examine_check))
 }
 
 pub async fn auth_router(app_router: Router) -> Router {
     app_router
         .route("/list_paper_examines", post(list_paper_examines))
-        .route("/examine_update/:id", get(examine_update))
+        .route("/examine_update/:id/:problem_type", get(examine_update))
         .route("/examine_results/:union_id", get(examine_result))
         .route("/paper/:union_id", get(papers))
         .route("/list_union", get(list_union))

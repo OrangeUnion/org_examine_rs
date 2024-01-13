@@ -3,16 +3,18 @@ use serde::{Deserialize, Serialize};
 use sqlx::types::Json;
 use crate::app::{get_pool, org_examine_result};
 use crate::{log_error, log_info, util};
-use crate::app::org_examine_result::CheckResult;
+use crate::app::org_examine_result::{CheckResult, UpdateCheck};
 
 pub type Examines = Vec<Examine>;
+pub type ExamineValue = Vec<String>;
+pub type ExamineValues = Vec<ExamineValue>;
 
 #[derive(Clone, Debug, Serialize, Deserialize, sqlx::FromRow)]
 pub struct Examine {
     pub id: i64,
     pub problem: String,
-    pub answers: Json<Vec<String>>,
-    pub correct_answer: i64,
+    pub answers: Json<ExamineValue>,
+    pub correct_answer: Json<ExamineValue>,
     pub problem_type: i64,
     pub paper_id: i64,
     pub status: i64,
@@ -23,6 +25,7 @@ pub struct Examine {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct InsertExamine {
     pub problem: String,
+    pub problem_type: i64,
     pub paper_id: i64,
 }
 
@@ -30,8 +33,8 @@ pub struct InsertExamine {
 pub struct UpdateExamine {
     pub id: i64,
     pub problem: String,
-    pub answers: Vec<String>,
-    pub correct_answer: i64,
+    pub answers: ExamineValue,
+    pub correct_answer: ExamineValue,
     pub problem_type: i64,
     pub paper_id: i64,
 }
@@ -42,7 +45,7 @@ impl Default for Examine {
             id: 0,
             problem: "".to_string(),
             answers: Json::default(),
-            correct_answer: 0,
+            correct_answer: Json::default(),
             problem_type: 0,
             paper_id: 0,
             status: 0,
@@ -85,7 +88,10 @@ pub async fn select_examines_by_paper(paper_id: i64) -> Examines {
     let response = sqlx::query_as::<_, Examine>(sql).bind(paper_id).fetch_all(&conn).await;
     let res = match response {
         Ok(r) => { r }
-        Err(_) => { vec![Examine::default()] }
+        Err(e) => {
+            log_error!("{e}");
+            vec![Examine::default()]
+        }
     };
     for re in res.clone() {
         let ans = re.answers.0;
@@ -94,16 +100,18 @@ pub async fn select_examines_by_paper(paper_id: i64) -> Examines {
     Examines::from(res)
 }
 
-pub async fn insert_examine(problem: String, paper_id: i64) -> u64 {
+pub async fn insert_examine(insert_examine: InsertExamine) -> u64 {
     let conn = get_pool().await.expect("Link Pool Error");
     let datetime = util::datetime::now_beijing_time();
     let default_answer = Json(vec!["默认答案，请删除本答案并添加"]);
-    let sql = "INSERT INTO org_examine (problem, answers, correct_answer, paper_id, create_time, update_time) VALUES (?, ?, ?, ?, ?, ?)";
+    let default_correct_answer = Json(ExamineValue::from(["1".to_string()]));
+    let sql = "INSERT INTO org_examine (problem, answers, correct_answer, problem_type, paper_id, create_time, update_time) VALUES (?, ?, ?, ?, ?, ?, ?)";
     let response = sqlx::query(sql)
-        .bind(problem)
+        .bind(insert_examine.problem)
         .bind(default_answer)
-        .bind(1)
-        .bind(paper_id)
+        .bind(default_correct_answer)
+        .bind(insert_examine.problem_type)
+        .bind(insert_examine.paper_id)
         .bind(datetime)
         .bind(datetime)
         .execute(&conn).await;
@@ -118,14 +126,15 @@ pub async fn insert_examine(problem: String, paper_id: i64) -> u64 {
 
 pub async fn update_examine(update_examine: UpdateExamine) -> u64 {
     let conn = get_pool().await.expect("Link Pool Error");
-    // answer json化
+    // 答案json化
     let answer_value = Json(update_examine.answers);
+    let correct_answer_value = Json(update_examine.correct_answer);
     log_info!("json化 {answer_value:?}");
     let sql = "update org_examine set problem = ?, answers = ?, correct_answer = ?, problem_type = ?, paper_id = ?, update_time = ? where id = ?";
     let response = sqlx::query(sql)
         .bind(update_examine.problem)
         .bind(answer_value)
-        .bind(update_examine.correct_answer)
+        .bind(correct_answer_value)
         .bind(update_examine.problem_type)
         .bind(update_examine.paper_id)
         .bind(util::datetime::now_beijing_time())
@@ -155,29 +164,29 @@ pub async fn delete_examine(id: i64) -> u64 {
     }
 }
 
-pub async fn check_examine(user: String, union_id: i64, post_answers: Vec<i64>, paper_id: i64) -> CheckResult {
+pub async fn check_examine(update_check: UpdateCheck) -> CheckResult {
     // 查询用户提交次数
-    let user_examine_count = org_examine_result::count_examine_results_by_user(&user).await;
-    log_info!("COUNT {}考试次数{user_examine_count}",&user);
+    let user_examine_count = org_examine_result::count_examine_results_by_user(&update_check.user).await;
+    log_info!("COUNT {}考试次数{user_examine_count}",&update_check.user);
     // 查询考卷下的题目
-    let res = select_examines_by_paper(paper_id).await;
+    let res = select_examines_by_paper(update_check.paper_id).await;
     // 打包正确答案
-    let mut correct_answers = Vec::new();
+    let mut correct_answers = ExamineValues::new();
     for re in res {
-        correct_answers.push(re.correct_answer)
+        correct_answers.push(re.correct_answer.0)
     }
-    log_info!("提交答案: {post_answers:?} 正确答案: {correct_answers:?}");
+    log_info!("提交答案: {:?} 正确答案: {correct_answers:?}", update_check.answers);
 
     if user_examine_count > 10 {
         return CheckResult::Overrun;
     };
-    let result = match post_answers.eq(&correct_answers) {
+    let result = match update_check.answers.eq(&correct_answers) {
         true => CheckResult::Pass,
         false => CheckResult::UnPass,
     };
 
     // 写入数据库
-    let examine_result = org_examine_result::ExamineResult::update_to(user, union_id, paper_id, post_answers, result);
+    let examine_result = org_examine_result::ExamineResult::update_to(update_check, result);
     let to_result = org_examine_result::insert_examine_results(examine_result).await;
     log_info!("RESULT写入 {to_result}");
     result

@@ -30,20 +30,20 @@
             <p class="tracking-widest text-violet-600 text-lg font-medium mb-2">{{result.user}}</p>
             <div class="tracking-widest text-violet-800 text-base font-medium m-2">
                 {% for answer in result.answers.0 %}
-                <p>[{{loop.index}}] {{answer}}</p>
+                <p>[{{loop.index}}] {{"{:?}"|format(answer)}}</p>
                 {% endfor %}
             </div>
             <p class="tracking-widest text-violet-600 text-lg font-medium mb-2">
                 {% match result.result %}
-                    {% when CheckResult::Pass %}
+                    {% when crate::app::org_examine_result::CheckResult::Pass %}
                         合格
-                    {% when CheckResult::UnPass %}
+                    {% when crate::app::org_examine_result::CheckResult::UnPass %}
                         不合格
-                    {% when CheckResult::Overrun %}
+                    {% when crate::app::org_examine_result::CheckResult::Overrun %}
                         次数上限
-                    {% when CheckResult::TimeOut %}
+                    {% when crate::app::org_examine_result::CheckResult::TimeOut %}
                         超时
-                    {% when CheckResult::None %}
+                    {% when crate::app::org_examine_result::CheckResult::None %}
                         啥都不是
                 {% endmatch %}
             </p>

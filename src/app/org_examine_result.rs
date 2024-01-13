@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::types::Json;
 use crate::app::{get_pool, TableCount};
 use crate::{log_error, util};
+use crate::app::org_examine::ExamineValues;
 
 #[derive(Clone, Debug, Serialize, Deserialize, sqlx::Type, Copy)]
 #[repr(i8)]
@@ -22,19 +23,28 @@ pub struct ExamineResult {
     pub user: String,
     pub union_id: i64,
     pub paper_id: i64,
-    pub answers: Json<Vec<i64>>,
+    pub answers: Json<ExamineValues>,
     pub result: CheckResult,
     pub create_time: NaiveDateTime,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct UpdateCheck {
+    pub user: String,
+    pub union_id: i64,
+    pub paper_id: i64,
+    pub ticket_size: i64,
+    pub answers: ExamineValues,
+}
+
 impl ExamineResult {
-    pub fn update_to(user: String, union_id: i64, paper_id: i64, answers: Vec<i64>, result: CheckResult) -> Self {
+    pub fn update_to(update_check: UpdateCheck, result: CheckResult) -> Self {
         Self {
             id: 0,
-            user,
-            union_id,
-            paper_id,
-            answers: Json(answers),
+            user: update_check.user,
+            union_id: update_check.union_id,
+            paper_id: update_check.paper_id,
+            answers: Json(update_check.answers),
             result,
             create_time: Default::default(),
         }
@@ -68,7 +78,10 @@ pub async fn select_examine_results() -> ExamineResults {
         .fetch_all(&conn).await;
     let res = match response {
         Ok(r) => { r }
-        Err(_) => { ExamineResults::default() }
+        Err(e) => {
+            log_error!("{e}");
+            ExamineResults::default()
+        }
     };
     ExamineResults::from(res)
 }
@@ -81,7 +94,10 @@ pub async fn select_examine_results_by_user(user: &str) -> ExamineResults {
         .fetch_all(&conn).await;
     let res = match response {
         Ok(r) => { r }
-        Err(_) => { ExamineResults::default() }
+        Err(e) => {
+            log_error!("{e}");
+            ExamineResults::default()
+        }
     };
     ExamineResults::from(res)
 }
@@ -110,7 +126,10 @@ pub async fn select_examine_results_by_union_id(union_id: i64) -> ExamineResults
         .fetch_all(&conn).await;
     let res = match response {
         Ok(r) => { r }
-        Err(_) => { ExamineResults::default() }
+        Err(e) => {
+            log_error!("{e}");
+            ExamineResults::default()
+        }
     };
     ExamineResults::from(res)
 }

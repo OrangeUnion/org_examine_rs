@@ -1,7 +1,6 @@
 use redis::{Commands, RedisResult};
 use serde::{Deserialize, Serialize};
 use crate::app::{get_config, get_redis_conn};
-use crate::log_info;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct RedisUserInfo {
@@ -31,8 +30,6 @@ impl RedisUserInfo {
     }
 
     pub fn token_eq(&self, token: &str) -> bool {
-        log_info!("EQ self {}", self.token);
-        log_info!("EQ session {token}");
         self.token.eq(token)
     }
 }

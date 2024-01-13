@@ -38,13 +38,13 @@
             <div id="list_answers" class="grid grid-cols-1 flex space-y-5">
                 {% for answer in examine.answers.0 %}
                 <label class="flex justify-center items-center">
-                    <input type="radio" id="answer_{{loop.index}}"
+                    <input type="checkbox" id="answer_{{loop.index}}"
                            name="correct_answer"
                            value="{{loop.index}}"
                            class="my-1 ring-2 ring-purple-300 ring-offset-2 w-3 h-3
                 checked:bg-purple-500 checked:border-purple-300
-                hover:bg-purple-400 focus:outline-none rounded-full duration-300 appearance-none"
-                           {% if correct_answer[0].eq(loop.index.to_string().as_str()) %} checked {% endif %}>
+                hover:bg-purple-400 focus:outline-none rounded duration-300 appearance-none"
+                           {% if correct_answer[loop.index0].eq(loop.index.to_string().as_str()) %} checked {% endif %}>
                     <input name="answers" value="{{answer}}"
                            class="mx-2 text-purple-900 outline-none rounded-full bg-white border-solid border-inherit
                        hover:border-none active:border-solid
@@ -121,12 +121,12 @@
         const newLabel = document.createElement("label")
         newLabel.className = "flex justify-center items-center"
 
-        const newRadio = document.createElement("input")
-        newRadio.type = "radio"
-        newRadio.id = "answer_" + (labelCount + 1).toString()
-        newRadio.name = "correct_answer"
-        newRadio.className = "my-1 ring-2 ring-purple-300 ring-offset-2 w-3 h-3 checked:bg-purple-500 checked:border-purple-300 hover:bg-purple-400 focus:outline-none rounded-full duration-300 appearance-none"
-        newRadio.value = (labelCount + 1).toString()
+        const newCheckbox = document.createElement("input")
+        newCheckbox.type = "checkbox"
+        newCheckbox.id = "answer_" + (labelCount + 1).toString()
+        newCheckbox.name = "correct_answer"
+        newCheckbox.className = "my-1 ring-2 ring-purple-300 ring-offset-2 w-3 h-3 checked:bg-purple-500 checked:border-purple-300 hover:bg-purple-400 focus:outline-none rounded duration-300 appearance-none"
+        newCheckbox.value = (labelCount + 1).toString()
 
         // 创建一个新的 input 元素
         const newInput = document.createElement("input")
@@ -142,7 +142,7 @@
         }
 
         // 将 input 和 button 添加到 label 元素内部
-        newLabel.appendChild(newRadio)
+        newLabel.appendChild(newCheckbox)
         newLabel.appendChild(newInput)
         newLabel.appendChild(newButton)
 
@@ -179,7 +179,7 @@
             problem,
             answers: answers_array,
             correct_answer: correct_answer_array,
-            problem_type: 1,
+            problem_type: 2,
             paper_id
         })
         console.log(jsonData)
