@@ -23,6 +23,33 @@ pub async fn login() -> impl IntoResponse {
     Html(template)
 }
 
+pub async fn users() -> impl IntoResponse {
+    let template = http::UserTemplate {
+        title: "用户列表".to_string(),
+        users: sys_user::select_user_no_root().await,
+    }.to_string();
+    Html(template)
+}
+
+pub async fn insert_user() -> impl IntoResponse {
+    let template = http::UserInsertTemplate {
+        title: "新增用户".to_string(),
+        groups: sys_group::select_all_groups().await,
+        unions: org_union::select_all_union().await,
+    }.to_string();
+    Html(template)
+}
+
+pub async fn update_user(Path(id): Path<i64>) -> impl IntoResponse {
+    let template = http::UserUpdateTemplate {
+        title: "新增用户".to_string(),
+        user: sys_user::select_user_by_id(id).await,
+        groups: sys_group::select_all_groups().await,
+        unions: org_union::select_all_union().await,
+    }.to_string();
+    Html(template)
+}
+
 pub async fn examine_start() -> impl IntoResponse {
     let template = http::ExamineStartTemplate {
         title: "开始考试".to_string(),
@@ -139,6 +166,9 @@ pub async fn router(app_router: Router) -> Router {
 
 pub async fn auth_router(app_router: Router) -> Router {
     app_router
+        .route("/list_user", get(users))
+        .route("/insert_user_view", get(insert_user))
+        .route("/update_user_view/:id", get(update_user))
         .route("/list_paper_examines", post(list_paper_examines))
         .route("/examine_update/:id/:problem_type", get(examine_update))
         .route("/examine_results/:union_id", get(examine_result))

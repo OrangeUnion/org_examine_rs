@@ -4,20 +4,43 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::routing::{get, post};
 use serde_json::Value;
-use crate::{app, http, util};
+use crate::{http, util};
+use crate::app::{sys_group, sys_user};
+use crate::app::sys_user::UpdateUser;
 
 pub async fn select_users() -> impl IntoResponse {
-    let data = app::sys_user::select_all_user().await;
+    let data = sys_user::select_all_user().await;
     (http::headers(), Json(data))
 }
 
 pub async fn select_user(Path(username): Path<String>) -> impl IntoResponse {
-    let data = app::sys_user::select_one_user(&username).await;
+    let data = sys_user::select_one_user(&username).await;
     (http::headers(), Json(data))
 }
 
 pub async fn select_user_groups(Path(username): Path<String>) -> impl IntoResponse {
-    let data = app::sys_group::select_user_groups(&username).await;
+    let data = sys_group::select_user_groups(&username).await;
+    (http::headers(), Json(data))
+}
+
+pub async fn insert_user(Json(res): Json<UpdateUser>) -> impl IntoResponse {
+    let data = sys_user::insert_user(res).await;
+    (http::headers(), Json(data))
+}
+
+pub async fn update_user(Json(res): Json<UpdateUser>) -> impl IntoResponse {
+    let data = sys_user::update_user(res).await;
+    (http::headers(), Json(data))
+}
+
+pub async fn delete_user(Path(id): Path<i64>) -> impl IntoResponse {
+    let data = sys_user::delete_user(id).await;
+    (http::headers(), Json(data))
+}
+
+pub async fn update_user_status(Json(res): Json<Value>) -> impl IntoResponse {
+    let id = res["id"].as_i64().unwrap_or(0);
+    let data = sys_user::update_user_status(id).await;
     (http::headers(), Json(data))
 }
 
@@ -34,7 +57,7 @@ pub async fn show_user(Path(username): Path<String>) -> impl IntoResponse {
 pub async fn login_check(Json(body): Json<Value>) -> impl IntoResponse {
     let username = body["username"].as_str().unwrap_or("");
     let password = body["password"].as_str().unwrap_or("");
-    let data = app::sys_user::check_login(username, password).await;
+    let data = sys_user::check_login(username, password).await;
     (http::headers(), Json(data))
 }
 
@@ -58,5 +81,9 @@ pub async fn auth_router(app_router: Router) -> Router {
     app_router
         .route("/user/:username", get(select_user))
         .route("/group/:username", get(select_user_groups))
+        .route("/insert_user", post(insert_user))
+        .route("/update_user", post(update_user))
+        .route("/delete_user/:id", get(delete_user))
+        .route("/update_user_status", post(update_user_status))
         .route("/list_user/:username", get(list_user))
 }

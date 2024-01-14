@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>ORG 管理系统 - {{title}}</title>
+</head>
+<body class="bg-slate-50">
+<nav class="flex justify-between items-center bg-gradient-to-r from-purple-200 to-violet-200 p-3">
+    <span class="text-xl font-semibold text-purple-600">Org 平台</span>
+    <div class="flex justify-end w-auto">
+        <a href="#" onclick="link('/login')"
+           class="border bg-violet-500 border-violet-500 text-violet-50 text-base hover:bg-violet-600 hover:text-violet-50 active:bg-violet-700 bg-fixed rounded-lg px-5 py-1 drop-shadow-md duration-300">
+            登 录
+        </a>
+    </div>
+</nav>
+<div class="container mx-auto justify-center items-center m-10 lg:w-8/12 w-11/12">
+    <div id="card"
+         class="flex grid box-border rounded-3xl bg-purple-50 hover:shadow-xl shadow-lg shadow-purple-50s duration-300 p-6">
+        <span id="card_title"
+              class="m-5 tracking-widest text-purple-800 text-3xl text-center font-medium">更新用户</span>
+        <form id="card_form">
+            <div class="m-5 text-base text-purple-900">
+                <label class="my-3">输入账户
+                    <input id="username" name="username"
+                           class="mb-5 my-2 text-purple-900 outline-none rounded-full bg-white border-solid border-inherit
+                                  hover:border-none active:border-solid
+                                  shadow hover:shadow-md duration-300 h-10 p-3 w-full" value="{{user.username}}">
+                </label>
+                <label class="my-3">设置密码
+                    <input id="password" name="password"
+                           class="mb-5 my-2 text-purple-900 outline-none rounded-full bg-white border-solid border-inherit
+                                  hover:border-none active:border-solid
+                                  shadow hover:shadow-md duration-300 h-10 p-3 w-full">
+                </label>
+                <label class="my-3">过期时间
+                    <input id="expire_time" name="expire_time"
+                           class="mb-5 my-2 text-purple-900 outline-none rounded-full bg-white border-solid border-inherit
+                                  hover:border-none active:border-solid
+                                  shadow hover:shadow-md duration-300 h-10 p-3 w-full" type="datetime-local" value="{{user.expire_time}}">
+                </label>
+                <label class="my-3">选择联盟
+                    <select id="union"
+                            class="mb-3 my-1 text-purple-900 outline-none rounded-full bg-white border-solid border-inherit hover:border-none active:border-solid shadow hover:shadow-md duration-300 w-full h-10 px-3">
+                        {% for union in unions %}
+                        <option value="{{union.id}}" {% if user.union_id == union.id %}selected{% endif %}>{{union.name}}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+        </form>
+        <div class="m-5 flex justify-center container mx-auto text-center">
+            <button type="button" onclick="submit({{user.id}})"
+                    id="submit_button"
+                    class="m-2 border bg-purple-500 border-purple-500 text-purple-50 text-base hover:bg-purple-600 hover:text-purple-50 active:bg-purple-700 bg-fixed rounded-lg px-8 py-1 drop-shadow-md duration-300">
+                更新
+            </button>
+            <a href="#" onclick="link('/list_user')"
+               class="m-2 inline-block border bg-purple-500 border-purple-500 text-purple-50 text-base hover:bg-purple-600 hover:text-purple-50 active:bg-purple-700 bg-fixed rounded-lg px-8 py-1 drop-shadow-md duration-300">
+                首页
+            </a>
+        </div>
+    </div>
+</div>
+<script>
+    function submit(id) {
+        const username = document.getElementById('username').value
+        const password = document.getElementById('password').value
+        const expire_time = document.getElementById('expire_time').value
+        const union_id = document.getElementById('union').value
+        const jsonData = JSON.stringify({
+            id: id,
+            username,
+            password,
+            type: 1,
+            union_id: parseInt(union_id),
+            expire_time,
+        })
+        console.log(jsonData)
+        fetch(auth_url('/update_user'), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: jsonData
+        }).then(response => {
+            // 在这里处理服务器返回的响应
+            console.log('服务器返回的响应:', response)
+            return response.json()
+        }).then(data => {
+            console.log('服务器返回的响应:', data)
+            const res = data === 1 ? "更新成功" : "没有更新";
+            show_result(res)
+        }).catch(error => {
+            // 在这里处理发送请求的错误
+            console.error('发送请求时出错:', error)
+            show_result('re insert')
+        })
+    }
+
+    function show_result(result) {
+        // 改变页面
+        const card_title = document.getElementById("card_title")
+        const card_form = document.getElementById("card_form")
+        const submit_button = document.getElementById("submit_button")
+        card_form.remove()
+        submit_button.remove()
+        card_title.textContent = result
+    }
+</script>
+<script>
+    function auth_url(url) {
+        const params = new URLSearchParams()
+        params.append('user', sessionStorage.getItem('user'))
+        params.append('token', sessionStorage.getItem('token'))
+        return url + `?${params.toString()}`
+
+    }
+
+    function link(url) {
+        const urlWithParams = auth_url(url)
+        console.log(urlWithParams)
+        window.location.href = urlWithParams
+    }
+
+    function logout() {
+        sessionStorage.removeItem('user')
+        sessionStorage.removeItem('token')
+        sessionStorage.removeItem('union_id')
+        const urlWithParams = auth_url('/logout')
+        console.log(urlWithParams)
+        window.location.href = urlWithParams
+    }
+</script>
+</body>
+</html>

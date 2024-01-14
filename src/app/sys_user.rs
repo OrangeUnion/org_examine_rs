@@ -1,10 +1,10 @@
 use std::fmt::Display;
 use std::vec;
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use sqlx::types::chrono::{DateTime, Local};
 use crate::app::{get_pool, redis_util};
-use crate::{log_error, log_info, log_link, log_warn};
+use crate::{log_error, log_info, log_link, log_warn, util};
 use crate::util::permission;
 
 pub type Users = Vec<User>;
@@ -14,11 +14,21 @@ pub struct User {
     pub id: i64,
     pub username: String,
     pub password: String,
-    pub status: i64,
+    pub status: bool,
     pub r#type: i64,
     pub union_id: i64,
-    pub expire_time: DateTime<Local>,
-    pub create_time: DateTime<Local>,
+    pub expire_time: NaiveDateTime,
+    pub create_time: NaiveDateTime,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct UpdateUser {
+    pub id: i64,
+    pub username: String,
+    pub password: String,
+    pub r#type: i64,
+    pub union_id: i64,
+    pub expire_time: String,
 }
 
 impl Default for User {
@@ -27,11 +37,11 @@ impl Default for User {
             id: 0,
             username: "".to_string(),
             password: "".to_string(),
-            status: 0,
+            status: false,
             r#type: 0,
             union_id: -1,
-            expire_time: DateTime::default(),
-            create_time: Local::now(),
+            expire_time: Default::default(),
+            create_time: Default::default(),
         }
     }
 }
@@ -53,13 +63,118 @@ pub async fn select_all_user() -> Users {
     Users::from(res)
 }
 
+pub async fn select_user_no_root() -> Users {
+    let conn = get_pool().await.expect("Link Pool Error");
+    let sql = "select * from sys_user where id != 1";
+    let response = sqlx::query_as::<_, User>(sql).fetch_all(&conn).await;
+    let res = match response {
+        Ok(r) => { r }
+        Err(_) => { vec![User::default()] }
+    };
+    Users::from(res)
+}
+
+pub async fn select_user_by_id(id: i64) -> User {
+    let conn = get_pool().await.expect("Link Pool Error");
+    let sql = "select * from sys_user where id = ?";
+    let response = sqlx::query_as::<_, User>(sql).bind(id).fetch_one(&conn).await;
+    match response {
+        Ok(r) => { r }
+        Err(e) => {
+            log_error!("SQL Error {e}");
+            User::default()
+        }
+    }
+}
+
 pub async fn select_one_user(username: &str) -> User {
     let conn = get_pool().await.expect("Link Pool Error");
     let sql = "select * from sys_user where username = ?";
     let response = sqlx::query_as::<_, User>(sql).bind(username).fetch_one(&conn).await;
     match response {
         Ok(r) => { r }
-        Err(_) => { User::default() }
+        Err(e) => {
+            log_error!("SQL Error {e}");
+            User::default()
+        }
+    }
+}
+
+pub async fn insert_user(update_user: UpdateUser) -> u64 {
+    let conn = get_pool().await.expect("Link Pool Error");
+    let password = permission::encode_password(&update_user.password);
+    let datetime = util::datetime::now_beijing_time();
+    let sql = "INSERT INTO sys_user (username, password, type, union_id, expire_time, create_time) VALUES (?, ?, ?, ?, ?, ?)";
+    let response = sqlx::query(sql)
+        .bind(update_user.username)
+        .bind(password)
+        .bind(update_user.r#type)
+        .bind(update_user.union_id)
+        .bind(update_user.expire_time)
+        .bind(datetime)
+        .execute(&conn).await;
+    match response {
+        Ok(r) => {
+            log_info!("{}", r.last_insert_id());
+            r.rows_affected()
+        }
+        Err(e) => {
+            log_error!("SQL Error {e}");
+            0
+        }
+    }
+}
+
+pub async fn update_user(update_user: UpdateUser) -> u64 {
+    let conn = get_pool().await.expect("Link Pool Error");
+    let update_password = match update_user.password.as_str() {
+        "" => "".to_string(),
+        _ => format!("password = {}, ", update_user.password)
+    };
+    let sql = format!("update sys_user set username = ?, {update_password}type = ?, union_id = ?, expire_time = ? where id = ?");
+    let response = sqlx::query(&sql)
+        .bind(update_user.username)
+        .bind(update_user.r#type)
+        .bind(update_user.union_id)
+        .bind(update_user.expire_time)
+        .bind(update_user.id)
+        .execute(&conn).await;
+    match response {
+        Ok(r) => { r.rows_affected() }
+        Err(e) => {
+            log_error!("SQL Error {e}");
+            0
+        }
+    }
+}
+
+pub async fn update_user_status(id: i64) -> u64 {
+    let conn = get_pool().await.expect("Link Pool Error");
+    let sql = "update sys_user set status = !status where id = ?";
+    let response = sqlx::query(sql)
+        .bind(id)
+        .execute(&conn).await;
+    match response {
+        Ok(r) => { r.rows_affected() }
+        Err(e) => {
+            log_error!("SQL Error {e}");
+            0
+        }
+    }
+}
+
+pub async fn delete_user(id: i64) -> u64 {
+    let conn = get_pool().await.expect("Link Pool Error");
+    let sql = "delete from sys_user where id = ?";
+    let response = sqlx::query(sql)
+        .bind(id)
+        .execute(&conn).await;
+    match response {
+        Ok(r) => { r.rows_affected() }
+        Err(e) => {
+            log_error!("SQL Error {e}");
+            0
+        }
     }
 }
 

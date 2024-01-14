@@ -5,6 +5,8 @@ use crate::app::org_examine::{Examine, Examines, ExamineValue};
 use crate::app::org_examine_result::ExamineResults;
 use crate::app::org_paper::Papers;
 use crate::app::org_union::Unions;
+use crate::app::sys_group::Groups;
+use crate::app::sys_user::{User, Users};
 
 #[derive(Template)]
 #[template(path = "index.html")]
@@ -16,6 +18,30 @@ pub struct IndexTemplate {
 #[template(path = "login.html")]
 pub struct LoginTemplate {
     pub title: String,
+}
+
+#[derive(Template)]
+#[template(path = "user/index.html")]
+pub struct UserTemplate {
+    pub title: String,
+    pub users: Users,
+}
+
+#[derive(Template)]
+#[template(path = "user/insert.html")]
+pub struct UserInsertTemplate {
+    pub title: String,
+    pub groups: Groups,
+    pub unions: Unions,
+}
+
+#[derive(Template)]
+#[template(path = "user/update.html")]
+pub struct UserUpdateTemplate {
+    pub title: String,
+    pub user: User,
+    pub groups: Groups,
+    pub unions: Unions,
 }
 
 #[derive(Template)]

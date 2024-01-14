@@ -29,6 +29,18 @@ impl Display for Group {
     }
 }
 
+pub async fn select_all_groups() -> Groups {
+    let conn = get_pool().await.expect("Link Pool Error");
+    let sql = "select * from sys_group";
+    let response = sqlx::query_as::<_, Group>(sql)
+        .fetch_all(&conn).await;
+    let res = match response {
+        Ok(r) => { r }
+        Err(_) => { Groups::default() }
+    };
+    Groups::from(res)
+}
+
 pub async fn select_user_groups(username: &str) -> Groups {
     let conn = get_pool().await.expect("Link Pool Error");
     let sql = "select b.* from sys_user a, sys_group b, sys_user_group c where a.username = ? and a.id = c.user_id and b.id = c.group_id";
@@ -37,7 +49,7 @@ pub async fn select_user_groups(username: &str) -> Groups {
         .fetch_all(&conn).await;
     let res = match response {
         Ok(r) => { r }
-        Err(_) => { vec![Group::default()] }
+        Err(_) => { Groups::default() }
     };
     Groups::from(res)
 }
