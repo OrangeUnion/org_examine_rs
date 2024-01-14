@@ -91,6 +91,11 @@ pub async fn examine_update(Path((id, problem_type)): Path<(i64, i64)>) -> impl 
             examine: examine.clone(),
             correct_answer: examine.correct_answer.0,
         }.to_string(),
+        4 => http::ExamineUpdate4Template {
+            title: "问答题配置".to_string(),
+            examine: examine.clone(),
+            correct_answer: examine.correct_answer.0,
+        }.to_string(),
         _ => "404".to_string()
     };
     Html(template)

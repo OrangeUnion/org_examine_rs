@@ -38,6 +38,8 @@
                     [多选]
                     {% else if examine.problem_type == 3 %}
                     [填空]
+                    {% else if examine.problem_type == 4 %}
+                    [问答]
                     {% endif %}
                     {{examine.problem}}</span>
                 <div class="mb-2 grid grid-cols-1">

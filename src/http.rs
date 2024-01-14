@@ -68,6 +68,14 @@ pub struct ExamineUpdate3Template {
 }
 
 #[derive(Template)]
+#[template(path = "examine/update4.html")]
+pub struct ExamineUpdate4Template {
+    pub title: String,
+    pub examine: Examine,
+    pub correct_answer: ExamineValue,
+}
+
+#[derive(Template)]
 #[template(path = "examine/result.html")]
 pub struct ExamineResultTemplate {
     pub title: String,
