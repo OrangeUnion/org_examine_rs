@@ -3,7 +3,7 @@ use axum::{Json, Router};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::routing::{get, post};
-use serde_json::Value;
+use serde_json::{json, Value};
 use crate::{http, util};
 use crate::app::{sys_group, sys_user};
 use crate::app::sys_user::UpdateUser;
@@ -24,17 +24,32 @@ pub async fn select_user_groups(Path(username): Path<String>) -> impl IntoRespon
 }
 
 pub async fn insert_user(Json(res): Json<UpdateUser>) -> impl IntoResponse {
-    let data = sys_user::insert_user(res).await;
+    let insert_user = sys_user::insert_user(res.clone()).await;
+    let insert_group = sys_group::insert_group(res.id, res.group_ids).await;
+    let data = json!({
+        "insert_user": insert_user,
+        "insert_group": insert_group
+    });
     (http::headers(), Json(data))
 }
 
 pub async fn update_user(Json(res): Json<UpdateUser>) -> impl IntoResponse {
-    let data = sys_user::update_user(res).await;
+    let update_user = sys_user::update_user(res.clone()).await;
+    let update_group = sys_group::update_group(res.id, res.group_ids).await;
+    let data = json!({
+        "update_user": update_user,
+        "update_group": update_group
+    });
     (http::headers(), Json(data))
 }
 
 pub async fn delete_user(Path(id): Path<i64>) -> impl IntoResponse {
-    let data = sys_user::delete_user(id).await;
+    let delete_user = sys_user::delete_user(id).await;
+    let delete_group = sys_group::delete_group(id).await;
+    let data = json!({
+        "delete_user": delete_user,
+        "delete_group": delete_group
+    });
     (http::headers(), Json(data))
 }
 

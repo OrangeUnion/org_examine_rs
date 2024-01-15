@@ -56,7 +56,7 @@
                                name="examine_{{examine.id}}" value="{{loop.index}}" type="checkbox"/>
                         <span class="p-2 text-pretty">{{answer}}</span>
                     </label>
-                    {% else if examine.problem_type == 3 %}
+                    {% else if examine.problem_type == 3 || examine.problem_type == 4 %}
                     <label class="p-3">
                         <textarea name="examine_{{examine.id}}" rows="4"
                                   class="my-1 text-purple-900 outline-none rounded bg-white border-solid border-inherit

@@ -28,6 +28,7 @@ pub struct UpdateUser {
     pub password: String,
     pub r#type: i64,
     pub union_id: i64,
+    pub group_ids: Vec<i64>,
     pub expire_time: String,
 }
 

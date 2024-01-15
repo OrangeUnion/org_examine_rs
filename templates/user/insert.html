@@ -36,6 +36,22 @@
                                   hover:border-none active:border-solid
                                   shadow hover:shadow-md duration-300 h-10 p-3 w-full">
                 </label>
+
+                <div class="mb-5">
+                    <span>选择权限组</span>
+                    {% for group in groups %}
+                    <label class="my-3 flex items-center">
+                        <input type="checkbox"
+                               name="groups"
+                               value="{{group.id}}"
+                               class="my-1 mx-3 ring-2 ring-purple-300 ring-offset-2 w-3 h-3
+                               hover:bg-purple-400
+                               checked:bg-purple-500 checked:border-purple-300
+                               focus:outline-none rounded duration-300 appearance-none">
+                        {{group.title}}
+                    </label>
+                    {% endfor %}
+                </div>
                 <label class="my-3">过期时间
                     <input id="expire_time" name="expire_time"
                            class="mb-5 my-2 text-purple-900 outline-none rounded-full bg-white border-solid border-inherit
@@ -71,12 +87,19 @@
         const password = document.getElementById('password').value
         const expire_time = document.getElementById('expire_time').value
         const union_id = document.getElementById('union').value
+        const group_ids = []
+        document.getElementsByName('groups').forEach(value => {
+            if (value.checked) {
+                group_ids.push(parseInt(value.value))
+            }
+        })
         const jsonData = JSON.stringify({
             id: 0,
             username,
             password,
             type: 1,
             union_id: parseInt(union_id),
+            group_ids,
             expire_time,
         })
         console.log(jsonData)
@@ -92,7 +115,13 @@
             return response.json()
         }).then(data => {
             console.log('服务器返回的响应:', data)
-            const res = data === 1 ? "新增成功" : "没有新增";
+            let res = []
+            if (data.update_user > 0) {
+                res.push("新增成功")
+            }
+            if (data.update_group > 0 ) {
+                res.push("权限更新")
+            }
             show_result(res)
         }).catch(error => {
             // 在这里处理发送请求的错误

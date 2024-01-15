@@ -42,6 +42,7 @@ pub struct UserUpdateTemplate {
     pub user: User,
     pub groups: Groups,
     pub unions: Unions,
+    pub user_groups_id: Vec<i64>,
 }
 
 #[derive(Template)]

@@ -46,6 +46,7 @@ pub async fn update_user(Path(id): Path<i64>) -> impl IntoResponse {
         user: sys_user::select_user_by_id(id).await,
         groups: sys_group::select_all_groups().await,
         unions: org_union::select_all_union().await,
+        user_groups_id: sys_group::select_groups_by_user_id(id).await.1,
     }.to_string();
     Html(template)
 }
