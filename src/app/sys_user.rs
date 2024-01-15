@@ -116,8 +116,8 @@ pub async fn insert_user(update_user: UpdateUser) -> u64 {
         .execute(&conn).await;
     match response {
         Ok(r) => {
-            log_info!("{}", r.last_insert_id());
-            r.rows_affected()
+            log_info!("last_insert_id {}", r.last_insert_id());
+            r.last_insert_id()
         }
         Err(e) => {
             log_error!("SQL Error {e}");

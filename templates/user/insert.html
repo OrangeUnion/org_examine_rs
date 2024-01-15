@@ -116,10 +116,10 @@
         }).then(data => {
             console.log('服务器返回的响应:', data)
             let res = []
-            if (data.update_user > 0) {
+            if (data.insert_user > 0) {
                 res.push("新增成功")
             }
-            if (data.update_group > 0 ) {
+            if (data.insert_group > 0 ) {
                 res.push("权限更新")
             }
             show_result(res)

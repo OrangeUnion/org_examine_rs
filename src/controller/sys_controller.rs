@@ -25,7 +25,7 @@ pub async fn select_user_groups(Path(username): Path<String>) -> impl IntoRespon
 
 pub async fn insert_user(Json(res): Json<UpdateUser>) -> impl IntoResponse {
     let insert_user = sys_user::insert_user(res.clone()).await;
-    let insert_group = sys_group::insert_group(res.id, res.group_ids).await;
+    let insert_group = sys_group::insert_group(insert_user as i64, res.group_ids).await;
     let data = json!({
         "insert_user": insert_user,
         "insert_group": insert_group
