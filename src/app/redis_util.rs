@@ -40,8 +40,6 @@ pub async fn redis_save_session(redis_user_info: RedisUserInfo) -> RedisResult<b
         .arg(format!("org_user_{}", redis_user_info.username))
         .arg("id")
         .arg(redis_user_info.userid)
-        .arg("role_urls")
-        .arg(redis_user_info.role_urls.as_slice())
         .arg("union_id")
         .arg(redis_user_info.union_id)
         .arg("token")
