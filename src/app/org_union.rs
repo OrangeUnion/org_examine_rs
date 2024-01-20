@@ -2,7 +2,7 @@ use sqlx::types::chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
 use crate::app::get_pool;
 
-pub type Unions = Vec<Union>;
+pub type  Unions = Vec<Union>;
 
 #[derive(Clone, Debug, Serialize, Deserialize, sqlx::FromRow)]
 pub struct Union {
@@ -32,7 +32,7 @@ pub async fn select_all_union() -> Unions {
         .fetch_all(&conn).await;
     let res = match response {
         Ok(r) => { r }
-        Err(_) => { vec![Union::default()] }
+        Err(_) => { Unions::default() }
     };
-    Unions::from(res)
+    res
 }
