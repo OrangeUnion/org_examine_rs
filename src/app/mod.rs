@@ -47,7 +47,7 @@ pub async fn get_config() -> Config {
 
 pub async fn get_redis_conn() -> RedisResult<Connection> {
     let config = get_config().await;
-    let password = urlencoding::encode("Z#2nTt98ve!Q#*RY");
+    let password = urlencoding::encode(&config.redis_password);
     let client = redis::Client::open(format!("redis://{}:{}@{}", config.redis_username, password, config.redis_url))?;
     let con = client.get_connection()?;
     Ok(con)
