@@ -1,4 +1,4 @@
-server_port: 8000
+server_port: 50004
 database_url: mariadb://localhost:3306/org_system
 database_username: root
 database_password: 369
