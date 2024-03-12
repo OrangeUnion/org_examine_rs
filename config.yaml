@@ -2,7 +2,7 @@ server_port: 8000
 database_url: mariadb://localhost:3306/org_system
 database_username: root
 database_password: 369
-redis_url: 43.134.32.208:6379
+redis_url: 1.orgvoid.top:6379
 redis_username:
 redis_password: jhkdjhkjdhsIUTYURTU_sCDs5d
 redis_expire: 3600

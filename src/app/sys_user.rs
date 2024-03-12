@@ -136,6 +136,7 @@ pub async fn update_user(update_user: UpdateUser) -> u64 {
         }
     };
     let sql = format!("update sys_user set username = ?, {update_password}type = ?, union_id = ?, expire_time = ? where id = ?");
+    log_info!("{}", &sql);
     let response = sqlx::query(&sql)
         .bind(update_user.username)
         .bind(update_user.r#type)
