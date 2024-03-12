@@ -5,7 +5,7 @@ use axum::extract::Path;
 use axum::routing::{get, post};
 use serde_json::Value;
 use tower_http::auth::AsyncRequireAuthorizationLayer;
-use crate::{http, log_link, util};
+use crate::{http, log_info, log_link, util};
 use crate::app::*;
 use crate::controller::auths::*;
 
@@ -59,7 +59,7 @@ pub async fn examine_start() -> impl IntoResponse {
     Html(template)
 }
 
-pub async fn examine_client(Path((union_id, user)): Path<(i64, String)>) -> impl IntoResponse {
+pub async fn examine_client(Path((union_id, user, tag)): Path<(i64, String, String)>) -> impl IntoResponse {
     let paper_id = util::permission::random_paper_id_by_union(union_id).await;
     let examines = org_examine::select_examines_by_paper(paper_id).await;
     let template = http::ExamineClientTemplate {
@@ -68,6 +68,7 @@ pub async fn examine_client(Path((union_id, user)): Path<(i64, String)>) -> impl
         paper_id,
         union_id,
         user: user.clone(),
+        tag: tag.clone(),
     }.to_string();
     redis_util::redis_start_examine(&user, union_id, 3600).await.expect("Start Failed");
     Html(template)
@@ -162,7 +163,7 @@ pub async fn router(app_router: Router) -> Router {
         .route("/", get(index))
         .route("/login", get(login).layer(AsyncRequireAuthorizationLayer::new(LoginAuth)))
         .route("/examine_start", get(examine_start))
-        .route("/examine_client/:union_id/:user", get(examine_client))
+        .route("/examine_client/:union_id/:user/:tag", get(examine_client))
 }
 
 pub async fn auth_router(app_router: Router) -> Router {

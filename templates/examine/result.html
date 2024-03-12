@@ -28,6 +28,7 @@
     <div class="box-border rounded-3xl bg-gradient-to-r from-purple-100 to-violet-100 hover:shadow-xl shadow-lg shadow-zinc-50s duration-300 p-6">
         <a href="#">
             <p class="tracking-widest text-violet-600 text-lg font-medium mb-2">{{result.user}}</p>
+            <p class="tracking-widest text-violet-600 text-lg font-medium mb-2">{{result.tag}}</p>
             <div class="tracking-widest text-violet-800 text-base font-medium m-2">
                 {% for answer in result.answers.0 %}
                 <p>[{{loop.index}}] {{"{:?}"|format(answer)}}</p>
@@ -107,7 +108,7 @@
                     console.log('服务器返回的响应:', response)
                     const url = '/examine_results/' + sessionStorage.getItem('union_id')
                     console.log('Link to ' + url)
-                    window.location.href = url
+                    window.location.href = auth_url(url)
                 })
                 .catch(error => {
                     // 在这里处理发送请求的错误

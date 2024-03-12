@@ -25,10 +25,15 @@
             <div class="mb-2 grid grid-cols-1">
                 <label class="my-3">
                     <input class="text-purple-900 outline-none rounded-full bg-white border-solid border-inherit hover:border-none active:border-solid shadow hover:shadow-md duration-300 w-full h-10 px-3"
-                           id="user" name="user" type="text"/>
+                           id="user" name="user" type="text" placeholder="QQ号或微信号"/>
                 </label>
                 <label class="my-3">
-                    <select id="union" class="text-purple-900 outline-none rounded-full bg-white border-solid border-inherit hover:border-none active:border-solid shadow hover:shadow-md duration-300 w-full h-10 px-3">
+                    <input class="text-purple-900 outline-none rounded-full bg-white border-solid border-inherit hover:border-none active:border-solid shadow hover:shadow-md duration-300 w-full h-10 px-3"
+                           id="tag" name="tag" type="text" placeholder="部落标签"/>
+                </label>
+                <label class="my-3">
+                    <select id="union"
+                            class="text-purple-900 outline-none rounded-full bg-white border-solid border-inherit hover:border-none active:border-solid shadow hover:shadow-md duration-300 w-full h-10 px-3">
                         {% for union in unions %}
                         <option value="{{union.id}}">{{union.name}}</option>
                         {% endfor %}
@@ -77,10 +82,12 @@
 <script>
     function start() {
         const userInput = document.getElementById('user');
+        const tagInput = document.getElementById('tag');
         const unionSelect = document.getElementById('union');
         if (userInput instanceof HTMLInputElement) {
             const user = userInput.value
-            let url = user.length > 0 ? '/examine_client/' + unionSelect.value + '/' + userInput.value : '/examine_start';
+            const tag = tagInput.value.replaceAll('#', '')
+            let url = user.length > 0 ? '/examine_client/' + unionSelect.value + '/' + user + '/' + tag : '/examine_start';
             url = auth_url(url)
             console.log(url)
             window.location.href = url

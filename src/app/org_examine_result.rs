@@ -21,6 +21,7 @@ pub type ExamineResults = Vec<ExamineResult>;
 pub struct ExamineResult {
     pub id: i64,
     pub user: String,
+    pub tag: String,
     pub union_id: i64,
     pub paper_id: i64,
     pub answers: Json<ExamineValues>,
@@ -31,6 +32,7 @@ pub struct ExamineResult {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct UpdateCheck {
     pub user: String,
+    pub tag: String,
     pub union_id: i64,
     pub paper_id: i64,
     pub ticket_size: i64,
@@ -42,6 +44,7 @@ impl ExamineResult {
         Self {
             id: 0,
             user: update_check.user,
+            tag: update_check.tag,
             union_id: update_check.union_id,
             paper_id: update_check.paper_id,
             answers: Json(update_check.answers),
@@ -62,6 +65,7 @@ impl Default for ExamineResult {
         Self {
             id: 0,
             user: "".to_string(),
+            tag: "".to_string(),
             union_id: 0,
             paper_id: 0,
             answers: Default::default(),
@@ -137,9 +141,11 @@ pub async fn select_examine_results_by_union_id(union_id: i64) -> ExamineResults
 pub async fn insert_examine_results(examine_result: ExamineResult) -> u64 {
     let conn = get_pool().await.expect("Link Pool Error");
     let datetime = util::datetime::now_beijing_time();
-    let sql = "INSERT INTO org_examine_result (user, union_id, paper_id, answers, result, create_time) VALUES (?, ?, ?, ?, ?, ?)";
+    let tag = format!("#{}", examine_result.tag);
+    let sql = "INSERT INTO org_examine_result (user, tag, union_id, paper_id, answers, result, create_time) VALUES (?, ?, ?, ?, ?, ?, ?)";
     let response = sqlx::query(sql)
         .bind(examine_result.user)
+        .bind(tag)
         .bind(examine_result.union_id)
         .bind(examine_result.paper_id)
         .bind(examine_result.answers)

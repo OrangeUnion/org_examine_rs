@@ -60,6 +60,7 @@ pub struct ExamineClientTemplate {
     pub paper_id: i64,
     pub union_id: i64,
     pub user: String,
+    pub tag: String,
 }
 
 #[derive(Template)]

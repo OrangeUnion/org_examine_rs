@@ -48,7 +48,7 @@ impl<B: Send + 'static> AsyncAuthorizeRequest<B> for TokenAuth {
                 log_info!("check_uri_role {check_uri_role}");
 
                 if !redis_util::RedisUserInfo::redis_get_session(&user).await.token_eq(&token) {
-                    log_error!("not login");
+                    log_warn!("not login");
                     return Err(unauthorized_response);
                 };
                 if check_uri_role < 1 {
