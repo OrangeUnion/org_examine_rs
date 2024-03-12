@@ -36,7 +36,7 @@
     {% for paper in papers %}
     <div class="box-border rounded-3xl bg-gradient-to-r from-purple-100 to-violet-100 hover:shadow-xl shadow-lg shadow-zinc-50s duration-300 p-6">
         <button onclick="submit({{paper.id}}, '{{paper.title}}')" class="my-1">
-            <span class="tracking-widest text-violet-600 text-xl font-medium">{{paper.title}}</span>
+            <span class="tracking-widest text-violet-600 text-xl font-medium">[{{paper.id}}]{{paper.title}}</span>
         </button>
         <p class="my-1 text-violet-900 text-base">创建时间：{{paper.create_time}}</p>
         <button id="paper_status" onclick="update_status({{paper.id}}, {{paper.status}})" class="my-1 tracking-widest font-bold

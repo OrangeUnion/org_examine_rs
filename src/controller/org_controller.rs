@@ -4,7 +4,7 @@ use axum::response::IntoResponse;
 use axum::routing::{get, post};
 use serde_json::{json, Value};
 use crate::{http, log_info};
-use crate::app::{org_examine, org_paper};
+use crate::app::{org_examine, org_examine_result, org_paper};
 use crate::app::org_examine::{InsertExamine, UpdateExamine};
 use crate::app::org_examine_result::{CheckResult, UpdateCheck};
 use crate::app::org_paper::UpdatePaper;
@@ -84,6 +84,11 @@ pub async fn check_examine(Json(res): Json<UpdateCheck>) -> impl IntoResponse {
     (http::headers(), Json(json))
 }
 
+pub async fn delete_examine_result(Path(id): Path<i64>) -> impl IntoResponse {
+    log_info!("删除记录[{}]", id);
+    let data = org_examine_result::delete_examine_result(id).await;
+}
+
 pub async fn router(app_router: Router) -> Router {
     app_router
         .route("/examine_check", post(check_examine))
@@ -98,5 +103,6 @@ pub async fn auth_router(app_router: Router) -> Router {
         .route("/update_examine", post(update_examine))
         .route("/update_paper_status", post(update_paper_status))
         .route("/delete_examine/:id", get(delete_examine))
+        .route("/delete_examine_result/:id", get(delete_examine_result))
         .route("/list_examine", get(list_examine))
 }

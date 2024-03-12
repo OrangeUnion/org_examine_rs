@@ -154,3 +154,18 @@ pub async fn insert_examine_results(examine_result: ExamineResult) -> u64 {
         }
     }
 }
+
+pub async fn delete_examine_result(id: i64) -> u64 {
+    let conn = get_pool().await.expect("Link Pool Error");
+    let sql = "delete from org_examine_result where id = ?";
+    let response = sqlx::query(sql)
+        .bind(id)
+        .execute(&conn).await;
+    match response {
+        Ok(r) => { r.rows_affected() }
+        Err(e) => {
+            log_error!("SQL Error {e}");
+            0
+        }
+    }
+}

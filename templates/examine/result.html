@@ -34,6 +34,7 @@
                 {% endfor %}
             </div>
             <p class="tracking-widest text-violet-600 text-lg font-medium mb-2">
+                [考卷{{result.paper_id}}]
                 {% match result.result %}
                     {% when crate::app::org_examine_result::CheckResult::Pass %}
                         合格
@@ -51,7 +52,7 @@
         <div class="text-violet-900 text-base mb-2">
             <p>创建时间：{{result.create_time}}</p>
         </div>
-        <button id="delete_paper" onclick="delete_examine('{{result.id}}')" class="my-1 tracking-widest font-bold
+        <button id="delete_paper" onclick="delete_examine_result('{{result.id}}')" class="my-1 tracking-widest font-bold
                     bg-red-500
                     hover:bg-red-400
                     active:bg-red-600
@@ -94,6 +95,25 @@
         const urlWithParams = url + `?${params.toString()}`;
         console.log(urlWithParams)
         window.location.href = urlWithParams
+    }
+
+    function delete_examine_result(id) {
+        const confirmed = confirm("确定删除？");
+
+        if (confirmed) {
+            fetch(auth_url('/delete_examine_result/' + id))
+                .then(response => {
+                    // 在这里处理服务器返回的响应
+                    console.log('服务器返回的响应:', response)
+                    const url = '/examine_results/' + sessionStorage.getItem('union_id')
+                    console.log('Link to ' + url)
+                    window.location.href = url
+                })
+                .catch(error => {
+                    // 在这里处理发送请求的错误
+                    console.error('发送请求时出错:', error)
+                })
+        }
     }
 </script>
 </html>
