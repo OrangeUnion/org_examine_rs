@@ -130,7 +130,10 @@ pub async fn update_user(update_user: UpdateUser) -> u64 {
     let conn = get_pool().await.expect("Link Pool Error");
     let update_password = match update_user.password.as_str() {
         "" => "".to_string(),
-        _ => format!("password = {}, ", update_user.password)
+        _ => {
+            let password = permission::encode_password(&update_user.password);
+            format!("password = {}, ", password)
+        }
     };
     let sql = format!("update sys_user set username = ?, {update_password}type = ?, union_id = ?, expire_time = ? where id = ?");
     let response = sqlx::query(&sql)
