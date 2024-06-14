@@ -180,10 +180,24 @@ pub async fn check_examine(update_check: UpdateCheck) -> CheckResult {
     if user_examine_count > 10 {
         return CheckResult::Overrun;
     };
-    let result = match update_check.answers.eq(&correct_answers) {
+
+    // 逐个计数
+    let (mut i, mut t) = (0, 0f64);
+    for answer in update_check.answers {
+        if answer.eq(&correct_answers[i]) {
+            t += 1.0
+        }
+        i += 1
+    }
+    // 判断正确率大于80%
+    let result = match t / correct_answers.len() as f64 >= 0.8 {
         true => CheckResult::Pass,
         false => CheckResult::UnPass,
     };
+    // let result = match update_check.answers.eq(&correct_answers) {
+    //     true => CheckResult::Pass,
+    //     false => CheckResult::UnPass,
+    // };
 
     // 写入数据库
     let examine_result = org_examine_result::ExamineResult::update_to(update_check, result);

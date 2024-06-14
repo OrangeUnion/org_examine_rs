@@ -77,7 +77,7 @@ impl Default for ExamineResult {
 
 pub async fn select_examine_results() -> ExamineResults {
     let conn = get_pool().await.expect("Link Pool Error");
-    let sql = "select * from org_examine_result";
+    let sql = "select * from org_examine_result order by id desc";
     let response = sqlx::query_as::<_, ExamineResult>(sql)
         .fetch_all(&conn).await;
     let res = match response {
