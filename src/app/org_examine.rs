@@ -183,7 +183,7 @@ pub async fn check_examine(update_check: UpdateCheck) -> CheckResult {
 
     // 逐个计数
     let (mut i, mut t) = (0, 0f64);
-    for answer in update_check.answers {
+    for answer in &update_check.answers {
         if answer.eq(&correct_answers[i]) {
             t += 1.0
         }
