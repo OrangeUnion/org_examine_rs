@@ -1,7 +1,7 @@
 server_port: 50004
-database_url: mariadb://localhost:3306/org_system
+database_url: mariadb://1.orgvoid.top:3306/org_system
 database_username: root
-database_password: 1
+database_password: muzixi369
 redis_url: localhost:6379
 redis_username:
 redis_password:

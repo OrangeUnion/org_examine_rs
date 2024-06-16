@@ -25,6 +25,7 @@ pub struct ExamineResult {
     pub union_id: i64,
     pub paper_id: i64,
     pub answers: Json<ExamineValues>,
+    pub score: f64,
     pub result: CheckResult,
     pub create_time: NaiveDateTime,
 }
@@ -40,7 +41,7 @@ pub struct UpdateCheck {
 }
 
 impl ExamineResult {
-    pub fn update_to(update_check: UpdateCheck, result: CheckResult) -> Self {
+    pub fn update_to(update_check: UpdateCheck, result: CheckResult, score: f64) -> Self {
         Self {
             id: 0,
             user: update_check.user,
@@ -48,6 +49,7 @@ impl ExamineResult {
             union_id: update_check.union_id,
             paper_id: update_check.paper_id,
             answers: Json(update_check.answers),
+            score,
             result,
             create_time: Default::default(),
         }
@@ -69,6 +71,7 @@ impl Default for ExamineResult {
             union_id: 0,
             paper_id: 0,
             answers: Default::default(),
+            score: 0.0,
             result: Default::default(),
             create_time: Default::default(),
         }
@@ -142,13 +145,14 @@ pub async fn insert_examine_results(examine_result: ExamineResult) -> u64 {
     let conn = get_pool().await.expect("Link Pool Error");
     let datetime = util::datetime::now_beijing_time();
     let tag = format!("#{}", examine_result.tag);
-    let sql = "INSERT INTO org_examine_result (user, tag, union_id, paper_id, answers, result, create_time) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    let sql = "INSERT INTO org_examine_result (user, tag, union_id, paper_id, answers, score, result, create_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     let response = sqlx::query(sql)
         .bind(examine_result.user)
         .bind(tag)
         .bind(examine_result.union_id)
         .bind(examine_result.paper_id)
         .bind(examine_result.answers)
+        .bind(examine_result.score)
         .bind(examine_result.result)
         .bind(datetime)
         .execute(&conn).await;

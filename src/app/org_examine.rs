@@ -164,7 +164,7 @@ pub async fn delete_examine(id: i64) -> u64 {
     }
 }
 
-pub async fn check_examine(update_check: UpdateCheck) -> CheckResult {
+pub async fn check_examine(update_check: UpdateCheck) -> (CheckResult, f64) {
     // 查询用户提交次数
     let user_examine_count = org_examine_result::count_examine_results_by_user(&update_check.user).await;
     log_info!("COUNT {}考试次数{user_examine_count}",&update_check.user);
@@ -178,7 +178,7 @@ pub async fn check_examine(update_check: UpdateCheck) -> CheckResult {
     log_info!("提交答案: {:?} 正确答案: {correct_answers:?}", update_check.answers);
 
     if user_examine_count > 10 {
-        return CheckResult::Overrun;
+        return (CheckResult::Overrun, 0.0);
     };
 
     // 逐个计数
@@ -190,7 +190,8 @@ pub async fn check_examine(update_check: UpdateCheck) -> CheckResult {
         i += 1
     }
     // 判断正确率大于80%
-    let result = match t / correct_answers.len() as f64 >= 0.8 {
+    let score = t / correct_answers.len() as f64 * 100.0;
+    let result = match score >= 80.0 {
         true => CheckResult::Pass,
         false => CheckResult::UnPass,
     };
@@ -200,8 +201,8 @@ pub async fn check_examine(update_check: UpdateCheck) -> CheckResult {
     // };
 
     // 写入数据库
-    let examine_result = org_examine_result::ExamineResult::update_to(update_check, result);
+    let examine_result = org_examine_result::ExamineResult::update_to(update_check, result, score);
     let to_result = org_examine_result::insert_examine_results(examine_result).await;
     log_info!("RESULT写入 {to_result}");
-    result
+    (result, score)
 }

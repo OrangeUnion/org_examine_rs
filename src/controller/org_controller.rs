@@ -70,7 +70,7 @@ pub async fn delete_examine(Path(id): Path<i64>) -> impl IntoResponse {
 
 pub async fn check_examine(Json(res): Json<UpdateCheck>) -> impl IntoResponse {
     log_info!("{res:?}");
-    let data = org_examine::check_examine(res).await;
+    let (data, score) = org_examine::check_examine(res).await;
     let result = match data {
         CheckResult::Pass => "考试合格",
         CheckResult::UnPass => "考试不合格",
@@ -79,7 +79,8 @@ pub async fn check_examine(Json(res): Json<UpdateCheck>) -> impl IntoResponse {
         CheckResult::None => "啥都不是",
     }.to_string();
     let json = json!({
-        "result": result
+        "result": result,
+        "score": score
     });
     (http::headers(), Json(json))
 }

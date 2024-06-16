@@ -70,7 +70,8 @@
             {% endfor %}
         </form>
         <div class="m-5 flex justify-center container mx-auto text-center">
-            <button type="button" onclick="submit('{{user}}', '{{tag}}', {{examines.len()}}, {{paper_id}}, {{union_id}})"
+            <button type="button"
+                    onclick="submit('{{user}}', '{{tag}}', {{examines.len()}}, {{paper_id}}, {{union_id}})"
                     id="submit_button"
                     class="m-2 border bg-purple-500 border-purple-500 text-purple-50 text-base hover:bg-purple-600 hover:text-purple-50 active:bg-purple-700 bg-fixed rounded-lg px-8 py-1 drop-shadow-md duration-300">
                 提交
@@ -118,7 +119,7 @@
             return response.json()
         }).then(data => {
             console.log('服务器返回的响应:', data)
-            show_result(data.result)
+            show_result(data.result + ' ' + data.score + '分')
         }).catch(error => {
             // 在这里处理发送请求的错误
             console.error('发送请求时出错:', error)
